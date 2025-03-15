@@ -115,6 +115,83 @@ procedure Tempo is
       Put (" " & Indicator & " ");
    end Put_Prompt;
 
+   procedure Do_Invalid is
+   begin
+      Put_Line ("");
+      Put_Line (" unrecognized command. try ""h"" for help.");
+   end Do_Invalid;
+
+   procedure Do_Help is
+   begin
+      Put_Line ("");
+      for C in Valid_Command loop
+         Put_Line (" "
+                   & Command_Long_Name (C)
+                   & " or "
+                   & Command_Short_Name (C)
+                   & ". "
+                   & Command_Description (C)
+                   & ".");
+      end loop;
+   end Do_Help;
+
+   procedure Do_Size (T : in out Tapper) is
+      Size : Integer;
+      Clamped_Size : Integer;
+      Reported : Buffer_Count;
+   begin
+      --  Read the new size
+      Put_Line ("");
+      Put (" new buffer size? ");
+      declare
+         Try_Size : constant String := Get_Line;
+      begin
+         --  Blank input is no-op
+         if Try_Size'Length = 0 then
+            return;
+         end if;
+
+         begin
+            Size := Integer'Value (Try_Size);
+         exception
+            when E : Constraint_Error =>
+               pragma Unreferenced (E);
+               Put_Line (" invalid digit found in string");
+               return;
+         end;
+      end;
+
+      --  Clamp to valid range
+      Clamped_Size := Size;
+      Clamped_Size := Integer'Max (Clamped_Size, 1);
+      Clamped_Size := Integer'Min (Clamped_Size, Integer (Max_Capacity));
+
+      --  Resize buffer
+      Tapper_Resize (T, Buffer_Count (Clamped_Size));
+      Reported := Tapper_Bounded_Capacity (T);
+
+      --  Report if size was clamped
+      if Integer (Reported) /= Size then
+         Put (" size too "
+              & (if Integer (Reported) < Size then "large" else "small")
+              & ", clamped to ");
+         Put (Integer (Reported), Width => 0);
+         Put_Line ("");
+      end if;
+   end Do_Size;
+
+   procedure Do_Print (T : Tapper) is
+   begin
+      Put_Line ("");
+      Put_Line (" " & Tapper_Buffer_Image (T));
+   end Do_Print;
+
+   procedure Do_Quit is
+   begin
+      Put_Line ("");
+      Put_Line (" goodbye");
+   end Do_Quit;
+
    Default_Buffer_Size : constant Buffer_Count := 10;
    Default_Bounded : constant Boolean := True;
 
@@ -132,91 +209,27 @@ begin
    --  Print splash text
    Put_Splash;
 
-   --  Read eval loop
    loop
       Put_Line ("");
 
       --  Print the BPM and buffer stats
       Put_Prompt (T);
 
+      --  Perform command
       declare
-         --  Read and parse command
          Input : constant String := Get_Line;
          C : constant Command := Parse_Command (Input);
       begin
-         --  Perform command
-         --  TODO: factor out command implementations
          case C is
-            when Invalid =>
-               Put_Line ("");
-               Put_Line (" unrecognized command. try ""h"" for help.");
-
-            when Help =>
-               Put_Line ("");
-               for C in Valid_Command loop
-                  Put_Line (" "
-                           & Command_Long_Name (C)
-                           & " or "
-                           & Command_Short_Name (C)
-                           & ". "
-                           & Command_Description (C)
-                           & ".");
-               end loop;
-
-            when Tap =>
-               Tapper_Tap (T);
-
-            when Clear =>
-               Tapper_Clear (T);
-
-            when Size =>
-               --  TODO: awful. make a function.
-               Put_Line ("");
-               Put (" new buffer size? ");
-               declare
-                  Try_Size : constant String := Get_Line;
-                  Size : Integer;
-                  Clamped_Size : Buffer_Count;
-                  Reported : Buffer_Count;
-               begin
-                  if Try_Size'Length /= 0 then
-                     begin
-                        Size := Integer'Value (Try_Size);
-                        Clamped_Size :=
-                          Buffer_Count (Integer'Max (0,
-                          Integer'Min (Integer (Max_Capacity),
-                          Size)));
-                        Tapper_Resize (T, Clamped_Size);
-                        Reported := Tapper_Bounded_Capacity (T);
-
-                        --  Report clamped size
-                        if Integer (Reported) < Size then
-                           Put (" size too large, clamped to ");
-                           Put (Integer (Reported), Width => 0);
-                           Put_Line ("");
-                        end if;
-
-                     exception
-                        when E : Constraint_Error =>
-                           --  The exception message is not
-                           --  particularly helpful ("bad input"), so
-                           --  we ignore it.
-                           pragma Unreferenced (E);
-                           Put_Line (" invalid digit found in string");
-                     end;
-                  end if;
-               end;
-
-            when Bound =>
-               Tapper_Toggle_Bounded (T);
-
-            when Print =>
-               Put_Line ("");
-               Put_Line (" " & Tapper_Buffer_Image (T));
-
+            when Invalid => Do_Invalid;
+            when Help => Do_Help;
+            when Tap => Tapper_Tap (T);
+            when Clear => Tapper_Clear (T);
+            when Size => Do_Size (T);
+            when Bound => Tapper_Toggle_Bounded (T);
+            when Print => Do_Print (T);
             when Quit =>
-               Put_Line ("");
-               Put_Line (" goodbye");
+               Do_Quit;
                exit;
          end case;
       end;
