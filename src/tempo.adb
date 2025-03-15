@@ -92,6 +92,29 @@ procedure Tempo is
       return Invalid;
    end Parse_Command;
 
+   procedure Put_Splash is
+   begin
+      Put_Line (Tempo_Config.Crate_Name
+                & " "
+                & Tempo_Config.Crate_Version
+                & ": " & Crate_Description);
+      Put_Line ("type ""h"" for help");
+   end Put_Splash;
+
+   procedure Put_Prompt (T : Tapper) is
+      Indicator : constant Character :=
+        (if Tapper_Is_Recording (T) then '*' else ';');
+   begin
+      Put (Integer (Tapper_Count (T)), Width => 0);
+      Put ("/");
+      Put (Integer (Tapper_Bounded_Capacity (T)), Width => 0);
+      Put_Line ((if Tapper_Is_Bounded (T) then "" else "+")
+                & " samples in buffer");
+      Put_Line (Sample_Image (Tapper_Bpm (T)) & " BPM");
+
+      Put (" " & Indicator & " ");
+   end Put_Prompt;
+
    Default_Buffer_Size : constant Buffer_Count := 10;
    Default_Bounded : constant Boolean := True;
 
@@ -107,33 +130,22 @@ begin
    end if;
 
    --  Print splash text
-   Put_Line (Tempo_Config.Crate_Name
-             & " "
-             & Tempo_Config.Crate_Version
-             & ": " & Crate_Description);
-   Put_Line ("type ""h"" for help");
-
-   --  TODO: factor out string fiddling and command implementations
+   Put_Splash;
 
    --  Read eval loop
    loop
       Put_Line ("");
 
       --  Print the BPM and buffer stats
-      Put (Integer (Tapper_Count (T)), Width => 0);
-      Put ("/");
-      Put (Integer (Tapper_Bounded_Capacity (T)), Width => 0);
-      Put_Line ((if Tapper_Is_Bounded (T) then "" else "+")
-                & " samples in buffer");
-      Put_Line (Sample_Image (Tapper_Bpm (T)) & " BPM");
+      Put_Prompt (T);
 
-      Put ((if Tapper_Is_Recording (T) then " * " else " ; "));
       declare
          --  Read and parse command
          Input : constant String := Get_Line;
          C : constant Command := Parse_Command (Input);
       begin
          --  Perform command
+         --  TODO: factor out command implementations
          case C is
             when Invalid =>
                Put_Line ("");
