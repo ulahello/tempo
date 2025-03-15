@@ -158,6 +158,7 @@ begin
                Tapper_Clear (T);
 
             when Size =>
+               --  TODO: awful. make a function.
                Put_Line ("");
                Put (" new buffer size? ");
                declare
@@ -166,21 +167,31 @@ begin
                   Clamped_Size : Buffer_Count;
                   Reported : Buffer_Count;
                begin
-                  --  FIXME: error handling
                   if Try_Size'Length /= 0 then
-                     Size := Integer'Value (Try_Size);
-                     Clamped_Size :=
-                       Buffer_Count (Integer'Min (Integer (Max_Capacity),
-                                                  Size));
-                     Tapper_Resize (T, Clamped_Size);
-                     Reported := Tapper_Bounded_Capacity (T);
+                     begin
+                        Size := Integer'Value (Try_Size);
+                        Clamped_Size :=
+                          Buffer_Count (Integer'Max (0,
+                          Integer'Min (Integer (Max_Capacity),
+                          Size)));
+                        Tapper_Resize (T, Clamped_Size);
+                        Reported := Tapper_Bounded_Capacity (T);
 
-                     --  Report clamped size
-                     if Integer (Reported) < Size then
-                        Put (" size too large, clamped to ");
-                        Put (Integer (Reported), Width => 0);
-                        Put_Line ("");
-                     end if;
+                        --  Report clamped size
+                        if Integer (Reported) < Size then
+                           Put (" size too large, clamped to ");
+                           Put (Integer (Reported), Width => 0);
+                           Put_Line ("");
+                        end if;
+
+                     exception
+                        when E : Constraint_Error =>
+                           --  The exception message is not
+                           --  particularly helpful ("bad input"), so
+                           --  we ignore it.
+                           pragma Unreferenced (E);
+                           Put_Line (" invalid digit found in string");
+                     end;
                   end if;
                end;
 
