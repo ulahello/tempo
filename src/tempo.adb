@@ -19,7 +19,6 @@ with Tempo_Tapper; use Tempo_Tapper;
 
 --  TODO: use a code formatter
 
---  FIXME: handle EOF
 --  TODO: UTF-8
 
 procedure Tempo is
@@ -236,4 +235,9 @@ begin
 
    end loop;
 
+exception
+   --  Handle EOF by immediately exiting.
+   when E : End_Error =>
+      pragma Unreferenced (E);
+      Do_Quit;
 end Tempo;
