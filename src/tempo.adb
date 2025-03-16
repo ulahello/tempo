@@ -3,7 +3,6 @@ with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Command_Line; use Ada.Command_Line;
 --  TODO: why can't i with/use Ada.Strings to bring this into scope?
 with Ada.Strings.Equal_Case_Insensitive;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.Maps.Constants;
 with Ada.Strings.Fixed;
 
@@ -73,20 +72,11 @@ procedure Tempo is
    begin
       --  Check S against every valid command
       for C in Valid_Command loop
-         declare
-            --  TODO: use bounded strings or constrain the strings
-            --  (might get refactored by the TODO about rewriting enum
-            --  to string functions as arrays)
-            Candidates : constant array (1 .. 2) of Unbounded_String :=
-              (To_Unbounded_String (Command_Long_Name (C)),
-               To_Unbounded_String (Command_Literal (C)));
-         begin
-            for Test of Candidates loop
-               if Equal_Case_Insensitive (S, To_String (Test)) then
-                  return C;
-               end if;
-            end loop;
-         end;
+         if Equal_Case_Insensitive (S, Command_Long_Name (C))
+           or else Equal_Case_Insensitive (S, Command_Literal (C))
+         then
+            return C;
+         end if;
       end loop;
       return Invalid;
    end Parse_Command;
