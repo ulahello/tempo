@@ -4,6 +4,8 @@ with Ada.Command_Line; use Ada.Command_Line;
 --  TODO: why can't i with/use Ada.Strings to bring this into scope?
 with Ada.Strings.Equal_Case_Insensitive;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Maps.Constants;
+with Ada.Strings.Fixed;
 
 --  TODO: so many clashing names
 --  - ex. Tap command, Tempo Tapper itself, and the package name
@@ -47,15 +49,15 @@ procedure Tempo is
          when others => Command_Literal (C));
 
    function Command_Long_Name (C : Valid_Command) return String is
-      --  TODO: just return lowercase Image
-      (case C is
-         when Help => "help",
-         when Tap => "tap",
-         when Clear => "clear",
-         when Size => "size",
-         when Bound => "bound",
-         when Print => "print",
-         when Quit => "quit");
+      S : String := Valid_Command'Image (C);
+   begin
+      --  TODO: still don't understand precise semantics of with/use
+      --  and how this affects scope, it would be nice to not type out
+      --  these names fully but also don't want to with/use everything
+      Ada.Strings.Fixed.Translate
+        (S, Ada.Strings.Maps.Constants.Lower_Case_Map);
+      return S;
+   end Command_Long_Name;
 
    function Command_Description (C : Valid_Command) return String is
       (case C is
