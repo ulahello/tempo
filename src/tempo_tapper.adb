@@ -60,6 +60,7 @@ package body Tempo_Tapper is
    procedure Tapper_Toggle_Bounded (T : in out Tapper) is
    begin
       T.Bounded := not T.Bounded;
+      Tapper_Sync_Capacity (T);
    end Tapper_Toggle_Bounded;
 
    function Tapper_Bpm (T : Tapper) return Sample is
