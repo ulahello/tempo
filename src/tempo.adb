@@ -31,8 +31,6 @@ procedure Tempo is
    subtype Valid_Command is Command
      with Static_Predicate => Valid_Command not in Invalid;
 
-   --  TODO: most of these Command ot String maps could be arrays
-
    function Command_Literal (C : Valid_Command) return String is
       (case C is
          when Help => "h",
