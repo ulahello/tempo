@@ -1,13 +1,13 @@
 with Ada.Real_Time; use Ada.Real_Time;
 
-with Ring_Buffer; use Ring_Buffer;
+with Ring_Buffer;  use Ring_Buffer;
 with Tempo_Sample; use Tempo_Sample;
 
 package Tempo_Tapper is
    type Tapper is private;
 
-   function Tapper_Init (Bounded_Capacity : Buffer_Count;
-                         Bounded : Boolean) return Tapper;
+   function Tapper_Init
+     (Bounded_Capacity : Buffer_Count; Bounded : Boolean) return Tapper;
    procedure Tapper_Tap (T : in out Tapper);
    procedure Tapper_Clear (T : in out Tapper);
    procedure Tapper_Resize (T : in out Tapper; S : Buffer_Count);
@@ -23,11 +23,11 @@ package Tempo_Tapper is
 private
 
    type Tapper is record
-      Samples : Buffer;
+      Samples          : Buffer;
       Bounded_Capacity : Buffer_Count;
-      Bounded : Boolean;
-      Recording : Boolean;
-      Last_Tap : Time;
+      Bounded          : Boolean;
+      Recording        : Boolean;
+      Last_Tap         : Time;
    end record;
 
 end Tempo_Tapper;

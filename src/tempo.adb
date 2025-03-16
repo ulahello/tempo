@@ -1,6 +1,7 @@
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
-with Ada.Command_Line; use Ada.Command_Line;
+with Ada.Command_Line;
+use Ada.Command_Line;
 --  TODO: why can't i with/use Ada.Strings to bring this into scope?
 with Ada.Strings.Equal_Case_Insensitive;
 with Ada.Strings.Maps.Constants;
@@ -13,12 +14,11 @@ with Ada.Strings.Fixed;
 --    away after generic ring buffer)
 --  - ex. Buffer integer types (which of `Buffer_Length` and
 --    `Buffer_Count` count the number of elements in the ring buffer?)
-with Ring_Buffer; use Ring_Buffer;
+with Ring_Buffer;  use Ring_Buffer;
 with Tempo_Config;
 with Tempo_Sample; use Tempo_Sample;
-with Tempo_Tapper; use Tempo_Tapper;
-
---  TODO: use a code formatter
+with Tempo_Tapper;
+use Tempo_Tapper;
 
 --  TODO: UTF-8
 
@@ -28,10 +28,10 @@ procedure Tempo is
 
    type Command is (Help, Tap, Clear, Size, Bound, Print, Quit, Invalid);
    subtype Valid_Command is Command
-     with Static_Predicate => Valid_Command not in Invalid;
+   with Static_Predicate => Valid_Command not in Invalid;
 
-   function Command_Literal (C : Valid_Command) return String is
-      (case C is
+   function Command_Literal (C : Valid_Command) return String
+   is (case C is
          when Help => "h",
          when Tap => "",
          when Clear => "c",
@@ -40,8 +40,8 @@ procedure Tempo is
          when Print => "p",
          when Quit => "q");
 
-   function Command_Short_Name (C : Valid_Command) return String is
-      (case C is
+   function Command_Short_Name (C : Valid_Command) return String
+   is (case C is
          when Tap => "<enter>",
          when others => Command_Literal (C));
 
@@ -56,8 +56,8 @@ procedure Tempo is
       return S;
    end Command_Long_Name;
 
-   function Command_Description (C : Valid_Command) return String is
-      (case C is
+   function Command_Description (C : Valid_Command) return String
+   is (case C is
          when Help => "describe commands",
          when Tap => "register a tap",
          when Clear => "clear buffer contents",
@@ -68,7 +68,7 @@ procedure Tempo is
 
    function Parse_Command (S : String) return Command is
       function Equal_Case_Insensitive (Left, Right : String) return Boolean
-        renames Ada.Strings.Equal_Case_Insensitive;
+      renames Ada.Strings.Equal_Case_Insensitive;
    begin
       --  Check S against every valid command
       for C in Valid_Command loop
@@ -83,10 +83,12 @@ procedure Tempo is
 
    procedure Put_Splash is
    begin
-      Put_Line (Tempo_Config.Crate_Name
-                & " "
-                & Tempo_Config.Crate_Version
-                & ": " & Crate_Description);
+      Put_Line
+        (Tempo_Config.Crate_Name
+         & " "
+         & Tempo_Config.Crate_Version
+         & ": "
+         & Crate_Description);
       Put_Line ("type ""h"" for help");
    end Put_Splash;
 
@@ -97,8 +99,8 @@ procedure Tempo is
       Put (Integer (Tapper_Count (T)), Width => 0);
       Put ("/");
       Put (Integer (Tapper_Bounded_Capacity (T)), Width => 0);
-      Put_Line ((if Tapper_Is_Bounded (T) then "" else "+")
-                & " samples in buffer");
+      Put_Line
+        ((if Tapper_Is_Bounded (T) then "" else "+") & " samples in buffer");
       Put_Line (Sample_Image (Tapper_Bpm (T)) & " BPM");
 
       Put (" " & Indicator & " ");
@@ -114,20 +116,21 @@ procedure Tempo is
    begin
       Put_Line ("");
       for C in Valid_Command loop
-         Put_Line (" "
-                   & Command_Long_Name (C)
-                   & " or "
-                   & Command_Short_Name (C)
-                   & ". "
-                   & Command_Description (C)
-                   & ".");
+         Put_Line
+           (" "
+            & Command_Long_Name (C)
+            & " or "
+            & Command_Short_Name (C)
+            & ". "
+            & Command_Description (C)
+            & ".");
       end loop;
    end Do_Help;
 
    procedure Do_Size (T : in out Tapper) is
-      Size : Integer;
+      Size         : Integer;
       Clamped_Size : Integer;
-      Reported : Buffer_Count;
+      Reported     : Buffer_Count;
    begin
       --  Read the new size
       Put_Line ("");
@@ -161,9 +164,10 @@ procedure Tempo is
 
       --  Report if size was clamped
       if Integer (Reported) /= Size then
-         Put (" size too "
-              & (if Integer (Reported) < Size then "large" else "small")
-              & ", clamped to ");
+         Put
+           (" size too "
+            & (if Integer (Reported) < Size then "large" else "small")
+            & ", clamped to ");
          Put (Integer (Reported), Width => 0);
          Put_Line ("");
       end if;
@@ -182,7 +186,7 @@ procedure Tempo is
    end Do_Quit;
 
    Default_Buffer_Size : constant Buffer_Count := 10;
-   Default_Bounded : constant Boolean := True;
+   Default_Bounded     : constant Boolean := True;
 
    T : Tapper := Tapper_Init (Default_Buffer_Size, Default_Bounded);
 
@@ -207,16 +211,30 @@ begin
       --  Perform command
       declare
          Input : constant String := Get_Line;
-         C : constant Command := Parse_Command (Input);
+         C     : constant Command := Parse_Command (Input);
       begin
          case C is
-            when Invalid => Do_Invalid;
-            when Help => Do_Help;
-            when Tap => Tapper_Tap (T);
-            when Clear => Tapper_Clear (T);
-            when Size => Do_Size (T);
-            when Bound => Tapper_Toggle_Bounded (T);
-            when Print => Do_Print (T);
+            when Invalid =>
+               Do_Invalid;
+
+            when Help =>
+               Do_Help;
+
+            when Tap =>
+               Tapper_Tap (T);
+
+            when Clear =>
+               Tapper_Clear (T);
+
+            when Size =>
+               Do_Size (T);
+
+            when Bound =>
+               Tapper_Toggle_Bounded (T);
+
+            when Print =>
+               Do_Print (T);
+
             when Quit =>
                Do_Quit;
                exit;

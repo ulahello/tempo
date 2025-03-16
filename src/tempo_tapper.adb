@@ -12,13 +12,13 @@ package body Tempo_Tapper is
 
    --  Public interface
 
-   function Tapper_Init (Bounded_Capacity : Buffer_Count;
-                         Bounded : Boolean) return Tapper is
-      (Samples => Buffer_Empty,
+   function Tapper_Init
+     (Bounded_Capacity : Buffer_Count; Bounded : Boolean) return Tapper
+   is (Samples          => Buffer_Empty,
        Bounded_Capacity => Bounded_Capacity,
-       Bounded => Bounded,
-       Recording => False,
-       Last_Tap => Time_Last);
+       Bounded          => Bounded,
+       Recording        => False,
+       Last_Tap         => Time_Last);
 
    procedure Tapper_Tap (T : in out Tapper) is
       Now : constant Time := Clock;
@@ -27,7 +27,7 @@ package body Tempo_Tapper is
       if T.Recording then
          declare
             Elapsed : constant Time_Span := Now - T.Last_Tap;
-            S : constant Sample := Sample_Init (Elapsed);
+            S       : constant Sample := Sample_Init (Elapsed);
          begin
             --  Push the new BPM sample and remove old elements
             Buffer_Push (T.Samples, S);
@@ -83,17 +83,17 @@ package body Tempo_Tapper is
       return Sample (A / Float (Buffer_Length (T.Samples)));
    end Tapper_Bpm;
 
-   function Tapper_Count (T : Tapper) return Buffer_Count is
-      (Buffer_Length (T.Samples));
+   function Tapper_Count (T : Tapper) return Buffer_Count
+   is (Buffer_Length (T.Samples));
 
-   function Tapper_Bounded_Capacity (T : Tapper) return Buffer_Count is
-      (T.Bounded_Capacity);
+   function Tapper_Bounded_Capacity (T : Tapper) return Buffer_Count
+   is (T.Bounded_Capacity);
 
-   function Tapper_Is_Recording (T : Tapper) return Boolean is
-      (T.Recording);
+   function Tapper_Is_Recording (T : Tapper) return Boolean
+   is (T.Recording);
 
-   function Tapper_Is_Bounded (T : Tapper) return Boolean is
-      (T.Bounded);
+   function Tapper_Is_Bounded (T : Tapper) return Boolean
+   is (T.Bounded);
 
    function Tapper_Buffer_Image (T : Tapper) return String is
       C : Unbounded_String := To_Unbounded_String (""); --  contents
@@ -102,8 +102,8 @@ package body Tempo_Tapper is
       --  TODO: feels bad
       for I in 1 .. L loop
          declare
-            S : constant Sample := Buffer_Get (T.Samples,
-                                               Buffer_Index (L - I));
+            S : constant Sample :=
+              Buffer_Get (T.Samples, Buffer_Index (L - I));
          begin
             C := C & Sample_Image (S);
          end;

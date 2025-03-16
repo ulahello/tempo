@@ -4,8 +4,8 @@ package body Ring_Buffer is
 
    --  Internals
 
-   function Mask (I : Ring_Index) return Buffer_Index is
-      (Buffer_Index (I mod Ring_Index (Max_Capacity)));
+   function Mask (I : Ring_Index) return Buffer_Index
+   is (Buffer_Index (I mod Ring_Index (Max_Capacity)));
 
    procedure Buffer_Pop_Unchecked (B : in out Buffer) is
    begin
@@ -20,14 +20,14 @@ package body Ring_Buffer is
 
    --  Public interface
 
-   function Buffer_Length (B : Buffer) return Buffer_Count is
-      (Buffer_Count (B.Write - B.Read));
+   function Buffer_Length (B : Buffer) return Buffer_Count
+   is (Buffer_Count (B.Write - B.Read));
 
-   function Buffer_Is_Empty (B : Buffer) return Boolean is
-      (B.Read = B.Write);
+   function Buffer_Is_Empty (B : Buffer) return Boolean
+   is (B.Read = B.Write);
 
-   function Buffer_Is_Full (B : Buffer) return Boolean is
-      (Buffer_Length (B) = Max_Capacity);
+   function Buffer_Is_Full (B : Buffer) return Boolean
+   is (Buffer_Length (B) = Max_Capacity);
 
    function Buffer_Get (B : Buffer; I : Buffer_Index) return Element is
    begin

@@ -1,4 +1,5 @@
-with Tempo_Sample; use Tempo_Sample;
+with Tempo_Sample;
+use Tempo_Sample;
 
 --  TODO: i should not implement a ring buffer / queue and instead
 --  should use an existing implementation... which exists, right?
@@ -35,13 +36,10 @@ private
 
    type Buffer is record
       Memory : Backing_Buffer;
-      Read : Ring_Index;
-      Write : Ring_Index;
+      Read   : Ring_Index;
+      Write  : Ring_Index;
    end record;
 
-   Buffer_Empty : constant Buffer :=
-     (Memory => <>,
-     Read => 0,
-     Write => 0);
+   Buffer_Empty : constant Buffer := (Memory => <>, Read => 0, Write => 0);
 
 end Ring_Buffer;
