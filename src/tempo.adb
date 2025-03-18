@@ -1,3 +1,5 @@
+pragma Ada_2022;
+
 with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Command_Line;
@@ -176,7 +178,7 @@ procedure Tempo is
    procedure Do_Print (T : Tapper) is
    begin
       Put_Line ("");
-      Put_Line (" " & Tapper_Buffer_Image (T));
+      Put_Line (" " & Tapper'Image (T));
    end Do_Print;
 
    procedure Do_Quit is

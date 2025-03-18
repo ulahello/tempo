@@ -1,5 +1,3 @@
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-
 package body Tempo_Tapper is
    --  Internals
 
@@ -9,6 +7,27 @@ package body Tempo_Tapper is
          Buffer_Truncate_Back (T.Samples, Tapper_Bounded_Capacity (T));
       end if;
    end Tapper_Sync_Capacity;
+
+   procedure Tapper_Buffer_Image
+     (Output : in out Ada.Strings.Text_Buffers.Root_Buffer_Type'Class;
+      Value  : Tapper)
+   is
+      L : constant Buffer_Count := Tapper_Count (Value);
+   begin
+      Output.Put ("[");
+      for I in 1 .. L loop
+         declare
+            S : constant Sample :=
+              Buffer_Get (Value.Samples, Buffer_Index (L - I));
+         begin
+            Output.Put (Sample_Image (S));
+         end;
+         if I < L then
+            Output.Put (", ");
+         end if;
+      end loop;
+      Output.Put ("]");
+   end Tapper_Buffer_Image;
 
    --  Public interface
 
@@ -92,24 +111,5 @@ package body Tempo_Tapper is
 
    function Tapper_Is_Bounded (T : Tapper) return Boolean
    is (T.Bounded);
-
-   function Tapper_Buffer_Image (T : Tapper) return String is
-      C : Unbounded_String := To_Unbounded_String (""); --  contents
-      L : constant Buffer_Count := Tapper_Count (T);
-   begin
-      --  TODO: feels bad
-      for I in 1 .. L loop
-         declare
-            S : constant Sample :=
-              Buffer_Get (T.Samples, Buffer_Index (L - I));
-         begin
-            C := C & Sample_Image (S);
-         end;
-         if I < L then
-            C := C & ", ";
-         end if;
-      end loop;
-      return "[" & To_String (C) & "]";
-   end Tapper_Buffer_Image;
 
 end Tempo_Tapper;

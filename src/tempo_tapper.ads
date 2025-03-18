@@ -1,4 +1,7 @@
+pragma Ada_2022;
+
 with Ada.Real_Time; use Ada.Real_Time;
+with Ada.Strings.Text_Buffers;
 
 with Ring_Buffer;  use Ring_Buffer;
 with Tempo_Sample; use Tempo_Sample;
@@ -17,10 +20,12 @@ package Tempo_Tapper is
    function Tapper_Bounded_Capacity (T : Tapper) return Buffer_Count;
    function Tapper_Is_Recording (T : Tapper) return Boolean;
    function Tapper_Is_Bounded (T : Tapper) return Boolean;
-   --  TODO: define attribute
-   function Tapper_Buffer_Image (T : Tapper) return String;
 
 private
+
+   procedure Tapper_Buffer_Image
+     (Output : in out Ada.Strings.Text_Buffers.Root_Buffer_Type'Class;
+      Value  : Tapper);
 
    type Tapper is record
       Samples          : Buffer;
@@ -28,6 +33,9 @@ private
       Bounded          : Boolean;
       Recording        : Boolean;
       Last_Tap         : Time;
-   end record;
+   end record
+   with
+     --  TODO: move this into public declaration
+     Put_Image => Tapper_Buffer_Image;
 
 end Tempo_Tapper;
