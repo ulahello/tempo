@@ -18,7 +18,7 @@ package body Tempo_Tapper is
        Bounded_Capacity => Bounded_Capacity,
        Bounded          => Bounded,
        Recording        => False,
-       Last_Tap         => Time_Last);
+       Last_Tap         => <>);
 
    procedure Tapper_Tap (T : in out Tapper) is
       Now : constant Time := Clock;
@@ -46,9 +46,7 @@ package body Tempo_Tapper is
       Buffer_Clear (T.Samples);
 
       --  Forget the latest tap
-      --  TODO: copy paste from Tapper_Init
       T.Recording := False;
-      T.Last_Tap := Time_Last;
    end Tapper_Clear;
 
    procedure Tapper_Resize (T : in out Tapper; S : Buffer_Count) is
