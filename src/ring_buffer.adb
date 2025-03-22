@@ -1,11 +1,28 @@
+pragma Ada_2022;
+
 --  TODO: tests and/or proof
 
 package body Ring_Buffer is
 
    --  Internals
 
-   function Mask (I : Ring_Index) return Buffer_Index
-   is (Buffer_Index (I mod Ring_Index (Max_Capacity)));
+   function Is_Power_Of_Two (N : Natural) return Boolean is
+   begin
+      --  TODO: silly but correct
+      for I in 0 .. Natural'Size - 1 loop
+         if 2 ** I = N then
+            return True;
+         end if;
+      end loop;
+      return False;
+   end Is_Power_Of_Two;
+
+   --  The Read and Write indices are 0-based because the math is
+   --  nicer, but since I can't specify the array index as
+   --  `(0 .. Discriminant - 1)`, the actual array is 1-based, so I
+   --  have to translate here.
+   function Mask (Max_Capacity : Capacity_Type; I : Ring_Index) return Natural
+   is (1 + Integer (I mod Ring_Index (Max_Capacity)));
 
    procedure Buffer_Pop_Unchecked (B : in out Buffer) is
    begin
@@ -14,27 +31,37 @@ package body Ring_Buffer is
 
    procedure Buffer_Push_Unchecked (B : in out Buffer; V : Element) is
    begin
-      B.Memory (Mask (B.Write)) := V;
+      B.Memory (Mask (B.Max_Capacity, B.Write)) := V;
       B.Write := B.Write + 1;
    end Buffer_Push_Unchecked;
 
    --  Public interface
 
-   function Buffer_Length (B : Buffer) return Buffer_Count
-   is (Buffer_Count (B.Write - B.Read));
+   function Buffer_Init (Max_Capacity : Capacity_Type) return Buffer is
+      Buffer_Empty : constant Buffer :=
+        (Max_Capacity => Max_Capacity,
+         Memory       => [others => <>],
+         Read         => 0,
+         Write        => 0);
+   begin
+      return Buffer_Empty;
+   end Buffer_Init;
+
+   function Buffer_Length (B : Buffer) return Natural
+   is (Natural (B.Write - B.Read));
 
    function Buffer_Is_Empty (B : Buffer) return Boolean
    is (B.Read = B.Write);
 
    function Buffer_Is_Full (B : Buffer) return Boolean
-   is (Buffer_Length (B) = Max_Capacity);
+   is (Buffer_Length (B) = B.Max_Capacity);
 
-   function Buffer_Get (B : Buffer; I : Buffer_Index) return Element is
+   function Buffer_Get (B : Buffer; I : Natural) return Element is
    begin
-      if Buffer_Count (I) >= Buffer_Length (B) then
+      if I >= Buffer_Length (B) then
          raise Constraint_Error with "buffer index out of bounds";
       end if;
-      return B.Memory (Mask (B.Read + Ring_Index (I)));
+      return B.Memory (Mask (B.Max_Capacity, B.Read + Ring_Index (I)));
    end Buffer_Get;
 
    procedure Buffer_Push (B : in out Buffer; V : Element) is
@@ -54,7 +81,7 @@ package body Ring_Buffer is
          raise Constraint_Error with "tried to pop from empty buffer";
       end if;
       Buffer_Pop_Unchecked (B);
-      return B.Memory (Mask (B.Read - 1));
+      return B.Memory (Mask (B.Max_Capacity, B.Read - 1));
    end Buffer_Pop;
 
    procedure Buffer_Clear (B : in out Buffer) is
@@ -62,7 +89,7 @@ package body Ring_Buffer is
       B.Write := B.Read;
    end Buffer_Clear;
 
-   procedure Buffer_Truncate_Back (B : in out Buffer; Length : Buffer_Count) is
+   procedure Buffer_Truncate_Back (B : in out Buffer; Length : Natural) is
    begin
       if Length < Buffer_Length (B) then
          B.Read := B.Write - Ring_Index (Length);

@@ -12,13 +12,12 @@ package body Tempo_Tapper is
      (Output : in out Ada.Strings.Text_Buffers.Root_Buffer_Type'Class;
       Value  : Tapper)
    is
-      L : constant Buffer_Count := Tapper_Count (Value);
+      L : constant Natural := Tapper_Count (Value);
    begin
       Output.Put ("[");
       for I in 1 .. L loop
          declare
-            S : constant Sample :=
-              Buffer_Get (Value.Samples, Buffer_Index (L - I));
+            S : constant Sample := Buffer_Get (Value.Samples, L - I);
          begin
             Output.Put (Sample_Image (S));
          end;
@@ -32,8 +31,8 @@ package body Tempo_Tapper is
    --  Public interface
 
    function Tapper_Init
-     (Bounded_Capacity : Buffer_Count; Bounded : Boolean) return Tapper
-   is (Samples          => Buffer_Empty,
+     (Bounded_Capacity : Natural; Bounded : Boolean) return Tapper
+   is (Samples          => Buffer_Init (Max_Capacity),
        Bounded_Capacity => Bounded_Capacity,
        Bounded          => Bounded,
        Recording        => False,
@@ -68,7 +67,7 @@ package body Tempo_Tapper is
       T.Recording := False;
    end Tapper_Clear;
 
-   procedure Tapper_Resize (T : in out Tapper; S : Buffer_Count) is
+   procedure Tapper_Resize (T : in out Tapper; S : Natural) is
    begin
       T.Bounded_Capacity := S;
       Tapper_Sync_Capacity (T);
@@ -91,7 +90,7 @@ package body Tempo_Tapper is
       --  TODO: use https://www.nu42.com/2015/03/how-you-average-numbers.html
       for I in 0 .. Integer (Buffer_Length (T.Samples)) - 1 loop
          declare
-            S : constant Sample := Buffer_Get (T.Samples, Buffer_Index (I));
+            S : constant Sample := Buffer_Get (T.Samples, I);
          begin
             A := A + Float (S);
          end;
@@ -100,10 +99,10 @@ package body Tempo_Tapper is
       return Sample (A / Float (Buffer_Length (T.Samples)));
    end Tapper_Bpm;
 
-   function Tapper_Count (T : Tapper) return Buffer_Count
+   function Tapper_Count (T : Tapper) return Natural
    is (Buffer_Length (T.Samples));
 
-   function Tapper_Bounded_Capacity (T : Tapper) return Buffer_Count
+   function Tapper_Bounded_Capacity (T : Tapper) return Natural
    is (T.Bounded_Capacity);
 
    function Tapper_Is_Recording (T : Tapper) return Boolean

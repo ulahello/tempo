@@ -14,9 +14,6 @@ with Ada.Strings.Fixed;
 --    where it's defined
 --  - ex. Sample type, package name where it's defined (this will go
 --    away after generic ring buffer)
---  - ex. Buffer integer types (which of `Buffer_Length` and
---    `Buffer_Count` count the number of elements in the ring buffer?)
-with Ring_Buffer;  use Ring_Buffer;
 with Tempo_Config;
 with Tempo_Sample; use Tempo_Sample;
 with Tempo_Tapper;
@@ -132,7 +129,7 @@ procedure Tempo is
    procedure Do_Size (T : in out Tapper) is
       Size         : Integer;
       Clamped_Size : Integer;
-      Reported     : Buffer_Count;
+      Reported     : Natural;
    begin
       --  Read the new size
       Put_Line ("");
@@ -161,7 +158,7 @@ procedure Tempo is
       Clamped_Size := Integer'Min (Clamped_Size, Integer (Max_Capacity));
 
       --  Resize buffer
-      Tapper_Resize (T, Buffer_Count (Clamped_Size));
+      Tapper_Resize (T, Clamped_Size);
       Reported := Tapper_Bounded_Capacity (T);
 
       --  Report if size was clamped
@@ -187,7 +184,7 @@ procedure Tempo is
       Put_Line (" goodbye");
    end Do_Quit;
 
-   Default_Buffer_Size : constant Buffer_Count := 10;
+   Default_Buffer_Size : constant Natural := 10;
    Default_Bounded     : constant Boolean := True;
 
    T : Tapper := Tapper_Init (Default_Buffer_Size, Default_Bounded);
