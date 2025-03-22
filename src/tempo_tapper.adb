@@ -103,7 +103,7 @@ package body Tempo_Tapper is
    is (Buffer_Length (T.Samples));
 
    function Tapper_Bounded_Capacity (T : Tapper) return Natural
-   is (T.Bounded_Capacity);
+   is (Natural'Min (T.Bounded_Capacity, T.Samples.Max_Capacity));
 
    function Tapper_Is_Recording (T : Tapper) return Boolean
    is (T.Recording);
