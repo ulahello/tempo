@@ -147,7 +147,7 @@ procedure Tempo is
          exception
             when E : Constraint_Error =>
                pragma Unreferenced (E);
-               Put_Line (" invalid digit found in string");
+               Put_Line (" invalid integer");
                return;
          end;
       end;
