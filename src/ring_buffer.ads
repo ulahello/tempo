@@ -16,7 +16,6 @@ package Ring_Buffer is
 
    function Buffer_Init (Max_Capacity : Capacity_Type) return Buffer;
 
-   --  TODO: define attribute
    function Buffer_Length (B : Buffer) return Natural;
    function Buffer_Is_Empty (B : Buffer) return Boolean;
    function Buffer_Is_Full (B : Buffer) return Boolean;
