@@ -1,3 +1,5 @@
+pragma Ada_2022;
+
 package body Tempo_Tapper is
    --  Internals
 
@@ -19,7 +21,7 @@ package body Tempo_Tapper is
          declare
             S : constant Sample := Buffer_Get (Value.Samples, L - I);
          begin
-            Output.Put (Sample_Image (S));
+            Output.Put (Sample'Image (S));
          end;
          if I < L then
             Output.Put (", ");

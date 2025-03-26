@@ -100,7 +100,7 @@ procedure Tempo is
       Put (Integer (Tapper_Bounded_Capacity (T)), Width => 0);
       Put_Line
         ((if Tapper_Is_Bounded (T) then "" else "+") & " samples in buffer");
-      Put_Line (Sample_Image (Tapper_Bpm (T)) & " BPM");
+      Put_Line (Sample'Image (Tapper_Bpm (T)) & " BPM");
 
       Put (" " & Indicator & " ");
    end Put_Prompt;
