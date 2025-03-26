@@ -1,16 +1,21 @@
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
+with System;
 
 package body Tempo_Sample is
    function Sample_Init (T : Time_Span) return Sample
    is (60.0 / Sample (To_Duration (T)));
 
-   --  TODO: if im always displaying samples with two decimal places,
+   --  TODO: if im always displaying samples with a scale of 1,
    --  is there a way to implicitly do this via the type system, while
    --  also maintaining precision internally?
    function Sample_Image (S : Sample) return String is
-      --  TODO: i only care about rounding to 2 decimal places, not
-      --  the overall precision (i am overspecifying)
-      type Rounded is delta 10.0 ** (-1) digits 12;
+      --  The exact number of digits isn't important, but if it's too
+      --  low (ex. 1, 2, 3 even) we are likely to hit constraint
+      --  errors for high BPMs or if the key is held down.
+      --
+      --  TODO: bad shape, i should probably use floating point. but
+      --  then i lose convenient specification of scale.
+      type Rounded is delta 10.0 ** (-1) digits System.Max_Digits;
    begin
       --  TODO: don't emit the extraneous space in the first place
       return Trim (Rounded'Image (Rounded (S)), Ada.Strings.Left);
