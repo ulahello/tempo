@@ -15,7 +15,6 @@ with Ada.Strings.Fixed;
 --  - ex. Sample type, package name where it's defined (this will go
 --    away after generic ring buffer)
 with Tempo_Config;
-with Tempo_Sample; use Tempo_Sample;
 with Tempo_Tapper;
 use Tempo_Tapper;
 
@@ -45,7 +44,7 @@ procedure Tempo is
          when others => Command_Literal (C));
 
    function Command_Long_Name (C : Valid_Command) return String is
-      S : String := Valid_Command'Image (C);
+      S : String := C'Image;
    begin
       --  TODO: still don't understand precise semantics of with/use
       --  and how this affects scope, it would be nice to not type out
@@ -100,7 +99,7 @@ procedure Tempo is
       Put (Integer (Tapper_Bounded_Capacity (T)), Width => 0);
       Put_Line
         ((if Tapper_Is_Bounded (T) then "" else "+") & " samples in buffer");
-      Put_Line (Sample'Image (Tapper_Bpm (T)) & " BPM");
+      Put_Line (Tapper_Bpm (T)'Image & " BPM");
 
       Put (" " & Indicator & " ");
    end Put_Prompt;
@@ -175,7 +174,7 @@ procedure Tempo is
    procedure Do_Print (T : Tapper) is
    begin
       Put_Line ("");
-      Put_Line (" " & Tapper'Image (T));
+      Put_Line (" " & T'Image);
    end Do_Print;
 
    procedure Do_Quit is

@@ -22,7 +22,7 @@ package body Tempo_Sample is
       type Rounded is delta 10.0 ** (-1) digits System.Max_Digits;
    begin
       --  TODO: don't emit the extraneous space in the first place
-      Output.Put (Trim (Rounded'Image (Rounded (Value)), Ada.Strings.Left));
+      Output.Put (Trim (Rounded (Value)'Image, Ada.Strings.Left));
    end Sample_Image;
 
 end Tempo_Sample;

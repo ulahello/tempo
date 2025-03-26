@@ -21,7 +21,7 @@ package body Tempo_Tapper is
          declare
             S : constant Sample := Buffer_Get (Value.Samples, L - I);
          begin
-            Output.Put (Sample'Image (S));
+            Output.Put (S'Image);
          end;
          if I < L then
             Output.Put (", ");
