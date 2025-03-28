@@ -9,11 +9,6 @@ with Ada.Strings.Equal_Case_Insensitive;
 with Ada.Strings.Maps.Constants;
 with Ada.Strings.Fixed;
 
---  TODO: so many clashing names
---  - ex. Tap command, Tempo Tapper itself, and the package name
---    where it's defined
---  - ex. Sample type, package name where it's defined (this will go
---    away after generic ring buffer)
 with Tempo_Config;
 with Tempo_Tapper;
 use Tempo_Tapper;
