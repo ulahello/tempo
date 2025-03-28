@@ -12,7 +12,7 @@ package Tempo_Tapper is
 
    Max_Capacity : Capacity_Type := 16#1000#;
 
-   type Tapper is private;
+   type Tapper is private with Put_Image => Tapper_Buffer_Image;
 
    function Tapper_Init
      (Bounded_Capacity : Natural; Bounded : Boolean) return Tapper;
@@ -26,11 +26,11 @@ package Tempo_Tapper is
    function Tapper_Is_Recording (T : Tapper) return Boolean;
    function Tapper_Is_Bounded (T : Tapper) return Boolean;
 
-private
-
    procedure Tapper_Buffer_Image
      (Output : in out Ada.Strings.Text_Buffers.Root_Buffer_Type'Class;
       Value  : Tapper);
+
+private
 
    type Tapper is record
       Samples          : Buffer (Max_Capacity);
@@ -38,9 +38,6 @@ private
       Bounded          : Boolean;
       Recording        : Boolean;
       Last_Tap         : Time;
-   end record
-   with
-     --  TODO: move this into public declaration
-     Put_Image => Tapper_Buffer_Image;
+   end record;
 
 end Tempo_Tapper;
