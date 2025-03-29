@@ -80,16 +80,15 @@ package body Tempo_Tapper is
    function Bpm (T : Tapper) return Sample is
       A : Float := 0.0;
    begin
-      if T.Samples.Length = 0 then
-         return Sample (A);
-      end if;
-
-      --  TODO: use https://www.nu42.com/2015/03/how-you-average-numbers.html
-      for S of T.Samples loop
-         A := A + Float (S);
+      --  https://www.nu42.com/2015/03/how-you-average-numbers.html
+      for C in T.Samples.Iterate loop
+         declare
+            S : constant Sample := T.Samples.Get (C);
+         begin
+            A := A + (Float (S) - A) / Float (C.Index); --  index starts at 1
+         end;
       end loop;
-
-      return Sample (A / Float (T.Samples.Length));
+      return Sample (A);
    end Bpm;
 
    function Count (T : Tapper) return Natural

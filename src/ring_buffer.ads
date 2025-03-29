@@ -13,7 +13,10 @@ package Ring_Buffer is
    with Dynamic_Predicate => Is_Power_Of_Two (Capacity_Type);
 
    --  Buffer is an iterator
-   type Cursor is private;
+   type Cursor (Length : Natural) is record
+      Index : Natural;
+   end record;
+
    function Has_Element (Position : Cursor) return Boolean;
    package Buffer_Iterator_Interfaces is new
      Ada.Iterator_Interfaces (Cursor, Has_Element);
@@ -70,11 +73,6 @@ private
       Memory : Element_Array (1 .. Max_Capacity);
       Read   : Ring_Index;
       Write  : Ring_Index;
-   end record;
-
-   type Cursor is record
-      Index  : Natural;
-      Length : Natural;
    end record;
 
 end Ring_Buffer;
