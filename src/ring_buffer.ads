@@ -6,11 +6,10 @@ with Ada.Iterator_Interfaces;
 generic
    type Element is private;
 package Ring_Buffer is
-   --  TODO: make this private
-   function Is_Power_Of_Two (N : Natural) return Boolean;
 
    subtype Capacity_Type is Natural
    with Dynamic_Predicate => Is_Power_Of_Two (Capacity_Type);
+   function Is_Power_Of_Two (N : Natural) return Boolean;
 
    --  Buffer is an iterator
    type Cursor (Length : Natural) is record
