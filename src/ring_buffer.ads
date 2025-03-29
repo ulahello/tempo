@@ -19,7 +19,7 @@ package Ring_Buffer is
      Ada.Iterator_Interfaces (Cursor, Has_Element);
 
    type Buffer (Max_Capacity : Capacity_Type) is
-     new Buffer_Iterator_Interfaces.Forward_Iterator with private
+     new Buffer_Iterator_Interfaces.Reversible_Iterator with private
    with
      Iterator_Element => Element,
      Default_Iterator => Iterate,
@@ -42,7 +42,7 @@ package Ring_Buffer is
 
    function Iterate
      (Container : Buffer)
-      return Buffer_Iterator_Interfaces.Forward_Iterator'Class;
+      return Buffer_Iterator_Interfaces.Reversible_Iterator'Class;
 
    function Buffer_Get (Container : Buffer; Position : Cursor) return Element;
 
@@ -50,7 +50,13 @@ package Ring_Buffer is
    function First (Object : Buffer) return Cursor;
 
    overriding
+   function Last (Object : Buffer) return Cursor;
+
+   overriding
    function Next (Object : Buffer; Position : Cursor) return Cursor;
+
+   overriding
+   function Previous (Object : Buffer; Position : Cursor) return Cursor;
 
 private
 
@@ -59,7 +65,7 @@ private
    type Ring_Index is mod Natural'Last;
 
    type Buffer (Max_Capacity : Capacity_Type) is
-     new Buffer_Iterator_Interfaces.Forward_Iterator
+     new Buffer_Iterator_Interfaces.Reversible_Iterator
    with record
       Memory : Element_Array (1 .. Max_Capacity);
       Read   : Ring_Index;

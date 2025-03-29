@@ -103,7 +103,7 @@ package body Ring_Buffer is
 
    function Iterate
      (Container : Buffer)
-      return Buffer_Iterator_Interfaces.Forward_Iterator'Class
+      return Buffer_Iterator_Interfaces.Reversible_Iterator'Class
    is (Container);
 
    function Buffer_Get (Container : Buffer; Position : Cursor) return Element
@@ -114,7 +114,15 @@ package body Ring_Buffer is
    is (Index => 0, Length => Buffer_Length (Object));
 
    overriding
+   function Last (Object : Buffer) return Cursor
+   is (Index => Buffer_Length (Object) - 1, Length => Buffer_Length (Object));
+
+   overriding
    function Next (Object : Buffer; Position : Cursor) return Cursor
    is (Index => Position.Index + 1, Length => Position.Length);
+
+   overriding
+   function Previous (Object : Buffer; Position : Cursor) return Cursor
+   is (Index => Position.Index - 1, Length => Position.Length);
 
 end Ring_Buffer;

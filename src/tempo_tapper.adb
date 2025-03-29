@@ -12,18 +12,16 @@ package body Tempo_Tapper is
 
    procedure Tapper_Buffer_Image
      (Output : in out Ada.Strings.Text_Buffers.Root_Buffer_Type'Class;
-      Value  : Tapper)
-   is
-      L : constant Natural := Tapper_Count (Value);
+      Value  : Tapper) is
    begin
       Output.Put ("[");
-      for I in 1 .. L loop
+      for C in reverse Value.Samples.Iterate loop
          declare
-            S : constant Sample := Buffer_Get (Value.Samples, L - I);
+            S : constant Sample := Buffer_Get (Value.Samples, C);
          begin
             Output.Put (S'Image);
          end;
-         if I < L then
+         if C /= Value.Samples.First then
             Output.Put (", ");
          end if;
       end loop;
