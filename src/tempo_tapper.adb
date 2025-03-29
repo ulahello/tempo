@@ -1,16 +1,17 @@
 pragma Ada_2022;
 
 package body Tempo_Tapper is
+
    --  Internals
 
-   procedure Tapper_Sync_Capacity (T : in out Tapper) is
+   procedure Sync_Capacity (T : in out Tapper) is
    begin
-      if Tapper_Is_Bounded (T) then
-         T.Samples.Truncate_Back (Tapper_Bounded_Capacity (T));
+      if T.Is_Bounded then
+         T.Samples.Truncate_Back (T.Bounded_Capacity);
       end if;
-   end Tapper_Sync_Capacity;
+   end Sync_Capacity;
 
-   procedure Tapper_Buffer_Image
+   procedure Tapper_Image
      (Output : in out Ada.Strings.Text_Buffers.Root_Buffer_Type'Class;
       Value  : Tapper) is
    begin
@@ -26,60 +27,57 @@ package body Tempo_Tapper is
          end if;
       end loop;
       Output.Put ("]");
-   end Tapper_Buffer_Image;
+   end Tapper_Image;
 
    --  Public interface
 
    function Tapper_Init
      (Bounded_Capacity : Natural; Bounded : Boolean) return Tapper
-   is (Samples          => Buffer_Init (Max_Capacity),
-       Bounded_Capacity => Bounded_Capacity,
-       Bounded          => Bounded,
-       Recording        => False,
-       Last_Tap         => <>);
+   is (Samples   => Buffer_Init (Max_Capacity),
+       Capacity  => Bounded_Capacity,
+       Bounded   => Bounded,
+       Recording => False,
+       Last_Tap  => <>);
 
-   procedure Tapper_Tap (T : in out Tapper) is
+   procedure Tap (T : in out Tapper) is
       Now : constant Time := Clock;
    begin
 
-      if T.Recording then
+      if T.Is_Recording then
          declare
             Elapsed : constant Time_Span := Now - T.Last_Tap;
             S       : constant Sample := Sample_Init (Elapsed);
          begin
             --  Push the new BPM sample and remove old elements
             T.Samples.Push (S);
-            Tapper_Sync_Capacity (T);
+            T.Sync_Capacity;
          end;
       end if;
 
       T.Last_Tap := Now;
       T.Recording := True;
 
-   end Tapper_Tap;
+   end Tap;
 
-   procedure Tapper_Clear (T : in out Tapper) is
+   procedure Clear (T : in out Tapper) is
    begin
-      --  Clear buffer
       T.Samples.Clear;
+      T.Recording := False; --  Forget the last tap
+   end Clear;
 
-      --  Forget the latest tap
-      T.Recording := False;
-   end Tapper_Clear;
-
-   procedure Tapper_Resize (T : in out Tapper; S : Natural) is
+   procedure Resize (T : in out Tapper; S : Natural) is
    begin
-      T.Bounded_Capacity := S;
-      Tapper_Sync_Capacity (T);
-   end Tapper_Resize;
+      T.Capacity := Natural'Min (S, Max_Capacity);
+      T.Sync_Capacity;
+   end Resize;
 
-   procedure Tapper_Toggle_Bounded (T : in out Tapper) is
+   procedure Toggle_Bounded (T : in out Tapper) is
    begin
       T.Bounded := not T.Bounded;
-      Tapper_Sync_Capacity (T);
-   end Tapper_Toggle_Bounded;
+      T.Sync_Capacity;
+   end Toggle_Bounded;
 
-   function Tapper_Bpm (T : Tapper) return Sample is
+   function Bpm (T : Tapper) return Sample is
       A : Float := 0.0;
    begin
       if T.Samples.Length = 0 then
@@ -92,18 +90,18 @@ package body Tempo_Tapper is
       end loop;
 
       return Sample (A / Float (T.Samples.Length));
-   end Tapper_Bpm;
+   end Bpm;
 
-   function Tapper_Count (T : Tapper) return Natural
+   function Count (T : Tapper) return Natural
    is (T.Samples.Length);
 
-   function Tapper_Bounded_Capacity (T : Tapper) return Natural
-   is (Natural'Min (T.Bounded_Capacity, T.Samples.Max_Capacity));
+   function Bounded_Capacity (T : Tapper) return Natural
+   is (T.Capacity);
 
-   function Tapper_Is_Recording (T : Tapper) return Boolean
-   is (T.Recording);
-
-   function Tapper_Is_Bounded (T : Tapper) return Boolean
+   function Is_Bounded (T : Tapper) return Boolean
    is (T.Bounded);
+
+   function Is_Recording (T : Tapper) return Boolean
+   is (T.Recording);
 
 end Tempo_Tapper;

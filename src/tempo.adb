@@ -86,15 +86,13 @@ procedure Tempo is
    end Put_Splash;
 
    procedure Put_Prompt (T : Tapper) is
-      Indicator : constant Character :=
-        (if Tapper_Is_Recording (T) then '*' else ';');
+      Indicator : constant Character := (if T.Is_Recording then '*' else ';');
    begin
-      Put (Integer (Tapper_Count (T)), Width => 0);
+      Put (T.Count, Width => 0);
       Put ("/");
-      Put (Integer (Tapper_Bounded_Capacity (T)), Width => 0);
-      Put_Line
-        ((if Tapper_Is_Bounded (T) then "" else "+") & " samples in buffer");
-      Put_Line (Tapper_Bpm (T)'Image & " BPM");
+      Put (T.Bounded_Capacity, Width => 0);
+      Put_Line ((if T.Is_Bounded then "" else "+") & " samples in buffer");
+      Put_Line (T.Bpm'Image & " BPM");
 
       Put (" " & Indicator & " ");
    end Put_Prompt;
@@ -149,19 +147,19 @@ procedure Tempo is
       --  Clamp to valid range
       Clamped_Size := Size;
       Clamped_Size := Integer'Max (Clamped_Size, 1);
-      Clamped_Size := Integer'Min (Clamped_Size, Integer (Max_Capacity));
+      Clamped_Size := Integer'Min (Clamped_Size, Max_Capacity);
 
       --  Resize buffer
-      Tapper_Resize (T, Clamped_Size);
-      Reported := Tapper_Bounded_Capacity (T);
+      T.Resize (Clamped_Size);
+      Reported := T.Bounded_Capacity;
 
       --  Report if size was clamped
-      if Integer (Reported) /= Size then
+      if Reported /= Size then
          Put
            (" size too "
-            & (if Integer (Reported) < Size then "large" else "small")
+            & (if Reported < Size then "large" else "small")
             & ", clamped to ");
-         Put (Integer (Reported), Width => 0);
+         Put (Reported, Width => 0);
          Put_Line ("");
       end if;
    end Do_Size;
@@ -214,16 +212,16 @@ begin
                Do_Help;
 
             when Tap =>
-               Tapper_Tap (T);
+               T.Tap;
 
             when Clear =>
-               Tapper_Clear (T);
+               T.Clear;
 
             when Size =>
                Do_Size (T);
 
             when Bound =>
-               Tapper_Toggle_Bounded (T);
+               T.Toggle_Bounded;
 
             when Print =>
                Do_Print (T);
