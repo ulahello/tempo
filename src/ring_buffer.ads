@@ -23,20 +23,20 @@ package Ring_Buffer is
    with
      Iterator_Element => Element,
      Default_Iterator => Iterate,
-     Constant_Indexing => Buffer_Get;
+     Constant_Indexing => Get;
 
    function Buffer_Init (Max_Capacity : Capacity_Type) return Buffer;
 
    --  Buffer operations
 
-   function Buffer_Length (B : Buffer) return Natural;
-   function Buffer_Is_Empty (B : Buffer) return Boolean;
-   function Buffer_Is_Full (B : Buffer) return Boolean;
-   function Buffer_Get (B : Buffer; I : Natural) return Element;
-   procedure Buffer_Push (B : in out Buffer; V : Element);
-   function Buffer_Pop (B : in out Buffer) return Element;
-   procedure Buffer_Clear (B : in out Buffer);
-   procedure Buffer_Truncate_Back (B : in out Buffer; Length : Natural);
+   function Length (B : Buffer) return Natural;
+   function Is_Empty (B : Buffer) return Boolean;
+   function Is_Full (B : Buffer) return Boolean;
+   function Get (B : Buffer; I : Natural) return Element;
+   procedure Push (B : in out Buffer; V : Element);
+   function Pop (B : in out Buffer) return Element;
+   procedure Clear (B : in out Buffer);
+   procedure Truncate_Back (B : in out Buffer; Length : Natural);
 
    --  Iterable container interface
 
@@ -44,7 +44,7 @@ package Ring_Buffer is
      (Container : Buffer)
       return Buffer_Iterator_Interfaces.Reversible_Iterator'Class;
 
-   function Buffer_Get (Container : Buffer; Position : Cursor) return Element;
+   function Get (Container : Buffer; Position : Cursor) return Element;
 
    overriding
    function First (Object : Buffer) return Cursor;

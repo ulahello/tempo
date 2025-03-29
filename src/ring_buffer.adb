@@ -24,16 +24,16 @@ package body Ring_Buffer is
    function Mask (Max_Capacity : Capacity_Type; I : Ring_Index) return Natural
    is (1 + Integer (I mod Ring_Index (Max_Capacity)));
 
-   procedure Buffer_Pop_Unchecked (B : in out Buffer) is
+   procedure Pop_Unchecked (B : in out Buffer) is
    begin
       B.Read := B.Read + 1;
-   end Buffer_Pop_Unchecked;
+   end Pop_Unchecked;
 
-   procedure Buffer_Push_Unchecked (B : in out Buffer; V : Element) is
+   procedure Push_Unchecked (B : in out Buffer; V : Element) is
    begin
       B.Memory (Mask (B.Max_Capacity, B.Write)) := V;
       B.Write := B.Write + 1;
-   end Buffer_Push_Unchecked;
+   end Push_Unchecked;
 
    --  Public interface
 
@@ -47,54 +47,54 @@ package body Ring_Buffer is
       return Buffer_Empty;
    end Buffer_Init;
 
-   function Buffer_Length (B : Buffer) return Natural
+   function Length (B : Buffer) return Natural
    is (Natural (B.Write - B.Read));
 
-   function Buffer_Is_Empty (B : Buffer) return Boolean
+   function Is_Empty (B : Buffer) return Boolean
    is (B.Read = B.Write);
 
-   function Buffer_Is_Full (B : Buffer) return Boolean
-   is (Buffer_Length (B) = B.Max_Capacity);
+   function Is_Full (B : Buffer) return Boolean
+   is (B.Length = B.Max_Capacity);
 
-   function Buffer_Get (B : Buffer; I : Natural) return Element is
+   function Get (B : Buffer; I : Natural) return Element is
    begin
-      if I >= Buffer_Length (B) then
+      if I >= B.Length then
          raise Constraint_Error with "buffer index out of bounds";
       end if;
       return B.Memory (Mask (B.Max_Capacity, B.Read + Ring_Index (I)));
-   end Buffer_Get;
+   end Get;
 
-   procedure Buffer_Push (B : in out Buffer; V : Element) is
+   procedure Push (B : in out Buffer; V : Element) is
    begin
       --  Make room for the new element
-      if Buffer_Is_Full (B) then
+      if B.Is_Full then
          --  The capacity is nonzero so the buffer is not empty
-         Buffer_Pop_Unchecked (B);
+         B.Pop_Unchecked;
       end if;
 
-      Buffer_Push_Unchecked (B, V);
-   end Buffer_Push;
+      B.Push_Unchecked (V);
+   end Push;
 
-   function Buffer_Pop (B : in out Buffer) return Element is
+   function Pop (B : in out Buffer) return Element is
    begin
-      if Buffer_Is_Empty (B) then
+      if B.Is_Empty then
          raise Constraint_Error with "tried to pop from empty buffer";
       end if;
-      Buffer_Pop_Unchecked (B);
+      B.Pop_Unchecked;
       return B.Memory (Mask (B.Max_Capacity, B.Read - 1));
-   end Buffer_Pop;
+   end Pop;
 
-   procedure Buffer_Clear (B : in out Buffer) is
+   procedure Clear (B : in out Buffer) is
    begin
       B.Write := B.Read;
-   end Buffer_Clear;
+   end Clear;
 
-   procedure Buffer_Truncate_Back (B : in out Buffer; Length : Natural) is
+   procedure Truncate_Back (B : in out Buffer; Length : Natural) is
    begin
-      if Length < Buffer_Length (B) then
+      if Length < B.Length then
          B.Read := B.Write - Ring_Index (Length);
       end if;
-   end Buffer_Truncate_Back;
+   end Truncate_Back;
 
    --  Iterable container implementation
 
@@ -106,16 +106,16 @@ package body Ring_Buffer is
       return Buffer_Iterator_Interfaces.Reversible_Iterator'Class
    is (Container);
 
-   function Buffer_Get (Container : Buffer; Position : Cursor) return Element
-   is (Buffer_Get (Container, Position.Index));
+   function Get (Container : Buffer; Position : Cursor) return Element
+   is (Container.Get (Position.Index));
 
    overriding
    function First (Object : Buffer) return Cursor
-   is (Index => 0, Length => Buffer_Length (Object));
+   is (Index => 0, Length => Object.Length);
 
    overriding
    function Last (Object : Buffer) return Cursor
-   is (Index => Buffer_Length (Object) - 1, Length => Buffer_Length (Object));
+   is (Index => Object.Length - 1, Length => Object.Length);
 
    overriding
    function Next (Object : Buffer; Position : Cursor) return Cursor

@@ -6,7 +6,7 @@ package body Tempo_Tapper is
    procedure Tapper_Sync_Capacity (T : in out Tapper) is
    begin
       if Tapper_Is_Bounded (T) then
-         Buffer_Truncate_Back (T.Samples, Tapper_Bounded_Capacity (T));
+         T.Samples.Truncate_Back (Tapper_Bounded_Capacity (T));
       end if;
    end Tapper_Sync_Capacity;
 
@@ -17,7 +17,7 @@ package body Tempo_Tapper is
       Output.Put ("[");
       for C in reverse Value.Samples.Iterate loop
          declare
-            S : constant Sample := Buffer_Get (Value.Samples, C);
+            S : constant Sample := Value.Samples.Get (C);
          begin
             Output.Put (S'Image);
          end;
@@ -48,7 +48,7 @@ package body Tempo_Tapper is
             S       : constant Sample := Sample_Init (Elapsed);
          begin
             --  Push the new BPM sample and remove old elements
-            Buffer_Push (T.Samples, S);
+            T.Samples.Push (S);
             Tapper_Sync_Capacity (T);
          end;
       end if;
@@ -61,7 +61,7 @@ package body Tempo_Tapper is
    procedure Tapper_Clear (T : in out Tapper) is
    begin
       --  Clear buffer
-      Buffer_Clear (T.Samples);
+      T.Samples.Clear;
 
       --  Forget the latest tap
       T.Recording := False;
@@ -82,7 +82,7 @@ package body Tempo_Tapper is
    function Tapper_Bpm (T : Tapper) return Sample is
       A : Float := 0.0;
    begin
-      if Buffer_Length (T.Samples) = 0 then
+      if T.Samples.Length = 0 then
          return Sample (A);
       end if;
 
@@ -91,11 +91,11 @@ package body Tempo_Tapper is
          A := A + Float (S);
       end loop;
 
-      return Sample (A / Float (Buffer_Length (T.Samples)));
+      return Sample (A / Float (T.Samples.Length));
    end Tapper_Bpm;
 
    function Tapper_Count (T : Tapper) return Natural
-   is (Buffer_Length (T.Samples));
+   is (T.Samples.Length);
 
    function Tapper_Bounded_Capacity (T : Tapper) return Natural
    is (Natural'Min (T.Bounded_Capacity, T.Samples.Max_Capacity));
