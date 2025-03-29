@@ -86,7 +86,6 @@ procedure Tempo is
    end Put_Splash;
 
    procedure Put_Prompt (T : Tapper) is
-      Indicator : constant Character := (if T.Is_Recording then '*' else ';');
    begin
       Put (T.Count, Width => 0);
       Put ("/");
@@ -94,7 +93,7 @@ procedure Tempo is
       Put_Line ((if T.Is_Bounded then "" else "+") & " samples in buffer");
       Put_Line (T.Bpm'Image & " BPM");
 
-      Put (" " & Indicator & " ");
+      Put (" " & (if T.Is_Recording then '*' else ';') & " ");
    end Put_Prompt;
 
    procedure Do_Invalid is
