@@ -2,12 +2,11 @@ pragma Ada_2022;
 
 with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
-with Ada.Command_Line;
-use Ada.Command_Line;
---  TODO: why can't i with/use Ada.Strings to bring this into scope?
+with Ada.Command_Line;    use Ada.Command_Line;
 with Ada.Strings.Equal_Case_Insensitive;
 with Ada.Strings.Maps.Constants;
 with Ada.Strings.Fixed;
+use Ada.Strings;
 
 with Tempo_Config;
 with Tempo_Tapper;
@@ -41,11 +40,7 @@ procedure Tempo is
    function Command_Long_Name (C : Valid_Command) return String is
       S : String := C'Image;
    begin
-      --  TODO: still don't understand precise semantics of with/use
-      --  and how this affects scope, it would be nice to not type out
-      --  these names fully but also don't want to with/use everything
-      Ada.Strings.Fixed.Translate
-        (S, Ada.Strings.Maps.Constants.Lower_Case_Map);
+      Fixed.Translate (S, Maps.Constants.Lower_Case_Map);
       return S;
    end Command_Long_Name;
 
@@ -60,8 +55,6 @@ procedure Tempo is
          when Quit => "quit");
 
    function Parse_Command (S : String) return Command is
-      function Equal_Case_Insensitive (Left, Right : String) return Boolean
-      renames Ada.Strings.Equal_Case_Insensitive;
    begin
       --  Check S against every valid command
       for C in Valid_Command loop
