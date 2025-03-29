@@ -56,12 +56,12 @@ package body Ring_Buffer is
    function Is_Full (B : Buffer) return Boolean
    is (B.Length = B.Max_Capacity);
 
-   function Get (B : Buffer; I : Natural) return Element is
+   function Get (B : Buffer; I : Positive) return Element is
    begin
-      if I >= B.Length then
+      if not Has_Element ((Index => I, Length => B.Length)) then
          raise Constraint_Error with "buffer index out of bounds";
       end if;
-      return B.Memory (Mask (B.Max_Capacity, B.Read + Ring_Index (I)));
+      return B.Memory (Mask (B.Max_Capacity, B.Read + Ring_Index (I - 1)));
    end Get;
 
    procedure Push (B : in out Buffer; V : Element) is
@@ -99,7 +99,7 @@ package body Ring_Buffer is
    --  Iterable container implementation
 
    function Has_Element (Position : Cursor) return Boolean
-   is (Position.Index in 0 .. Position.Length - 1);
+   is (Position.Index in 1 .. Position.Length);
 
    function Iterate
      (Container : Buffer)
@@ -111,11 +111,11 @@ package body Ring_Buffer is
 
    overriding
    function First (Object : Buffer) return Cursor
-   is (Index => 0, Length => Object.Length);
+   is (Index => 1, Length => Object.Length);
 
    overriding
    function Last (Object : Buffer) return Cursor
-   is (Index => Object.Length - 1, Length => Object.Length);
+   is (Index => Object.Length, Length => Object.Length);
 
    overriding
    function Next (Object : Buffer; Position : Cursor) return Cursor

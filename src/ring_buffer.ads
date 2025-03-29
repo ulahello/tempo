@@ -32,7 +32,7 @@ package Ring_Buffer is
    function Length (B : Buffer) return Natural;
    function Is_Empty (B : Buffer) return Boolean;
    function Is_Full (B : Buffer) return Boolean;
-   function Get (B : Buffer; I : Natural) return Element;
+   function Get (B : Buffer; I : Positive) return Element;
    procedure Push (B : in out Buffer; V : Element);
    function Pop (B : in out Buffer) return Element;
    procedure Clear (B : in out Buffer);
@@ -73,7 +73,7 @@ private
    end record;
 
    type Cursor is record
-      Index  : Integer;
+      Index  : Natural;
       Length : Natural;
    end record;
 
