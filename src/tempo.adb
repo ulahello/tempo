@@ -166,6 +166,7 @@ procedure Tempo is
    begin
       Put_Line ("");
       Put_Line (" goodbye");
+      Put_Line ("");
    end Do_Quit;
 
    Default_Buffer_Size : constant Natural := 10;
