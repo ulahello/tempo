@@ -96,4 +96,25 @@ package body Ring_Buffer is
       end if;
    end Buffer_Truncate_Back;
 
+   --  Iterable container implementation
+
+   function Has_Element (Position : Cursor) return Boolean
+   is (Position.Index in 0 .. Position.Length - 1);
+
+   function Iterate
+     (Container : Buffer)
+      return Buffer_Iterator_Interfaces.Forward_Iterator'Class
+   is (Container);
+
+   function Buffer_Get (Container : Buffer; Position : Cursor) return Element
+   is (Buffer_Get (Container, Position.Index));
+
+   overriding
+   function First (Object : Buffer) return Cursor
+   is (Index => 0, Length => Buffer_Length (Object));
+
+   overriding
+   function Next (Object : Buffer; Position : Cursor) return Cursor
+   is (Index => Position.Index + 1, Length => Position.Length);
+
 end Ring_Buffer;

@@ -88,14 +88,9 @@ package body Tempo_Tapper is
          return Sample (A);
       end if;
 
-      --  TODO: use iterators for less error-prone range? does this exist?
       --  TODO: use https://www.nu42.com/2015/03/how-you-average-numbers.html
-      for I in 0 .. Integer (Buffer_Length (T.Samples)) - 1 loop
-         declare
-            S : constant Sample := Buffer_Get (T.Samples, I);
-         begin
-            A := A + Float (S);
-         end;
+      for S of T.Samples loop
+         A := A + Float (S);
       end loop;
 
       return Sample (A / Float (Buffer_Length (T.Samples)));
