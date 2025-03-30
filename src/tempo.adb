@@ -9,8 +9,7 @@ with Ada.Strings.Fixed;
 use Ada.Strings;
 
 with Tempo_Config;
-with Tempo_Tapper;
-use Tempo_Tapper;
+with Tempo_Tapper; use Tempo_Tapper;
 
 procedure Tempo is
    --  TODO: surely i dont have to copy paste this

@@ -24,9 +24,11 @@ package body Ring_Buffer is
    function Mask (Max_Capacity : Capacity_Type; I : Ring_Index) return Natural
    is (1 + Integer (I mod Ring_Index (Max_Capacity)));
 
-   procedure Pop_Unchecked (B : in out Buffer) is
+   function Pop_Unchecked (B : in out Buffer) return Element is
+      Index : constant Ring_Index := B.Read;
    begin
       B.Read := B.Read + 1;
+      return B.Memory (Mask (B.Max_Capacity, Index));
    end Pop_Unchecked;
 
    procedure Push_Unchecked (B : in out Buffer; V : Element) is
@@ -65,11 +67,13 @@ package body Ring_Buffer is
    end Get;
 
    procedure Push (B : in out Buffer; V : Element) is
+      Extraneous : Element;
+      pragma Unreferenced (Extraneous);
    begin
       --  Make room for the new element
       if B.Is_Full then
          --  The capacity is nonzero so the buffer is not empty
-         B.Pop_Unchecked;
+         Extraneous := B.Pop_Unchecked;
       end if;
 
       B.Push_Unchecked (V);
@@ -80,8 +84,7 @@ package body Ring_Buffer is
       if B.Is_Empty then
          raise Constraint_Error with "tried to pop from empty buffer";
       end if;
-      B.Pop_Unchecked;
-      return B.Memory (Mask (B.Max_Capacity, B.Read - 1));
+      return B.Pop_Unchecked;
    end Pop;
 
    procedure Clear (B : in out Buffer) is
