@@ -21,19 +21,19 @@ package body Ring_Buffer is
    --  nicer, but since I can't specify the array index as
    --  `(0 .. Discriminant - 1)`, the actual array is 1-based, so I
    --  have to translate here.
-   function Mask (Max_Capacity : Capacity_Type; I : Ring_Index) return Natural
-   is (1 + Integer (I mod Ring_Index (Max_Capacity)));
+   function Mask (B : Buffer; I : Ring_Index) return Natural
+   is (1 + Integer (I mod Ring_Index (B.Max_Capacity)));
 
    function Pop_Unchecked (B : in out Buffer) return Element is
       Index : constant Ring_Index := B.Read;
    begin
       B.Read := B.Read + 1;
-      return B.Memory (Mask (B.Max_Capacity, Index));
+      return B.Memory (B.Mask (Index));
    end Pop_Unchecked;
 
    procedure Push_Unchecked (B : in out Buffer; V : Element) is
    begin
-      B.Memory (Mask (B.Max_Capacity, B.Write)) := V;
+      B.Memory (B.Mask (B.Write)) := V;
       B.Write := B.Write + 1;
    end Push_Unchecked;
 
@@ -63,7 +63,7 @@ package body Ring_Buffer is
       if not Has_Element ((Index => I, Length => B.Length)) then
          raise Constraint_Error with "buffer index out of bounds";
       end if;
-      return B.Memory (Mask (B.Max_Capacity, B.Read + Ring_Index (I - 1)));
+      return B.Memory (B.Mask (B.Read + Ring_Index (I - 1)));
    end Get;
 
    procedure Push (B : in out Buffer; V : Element) is
