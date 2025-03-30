@@ -12,8 +12,6 @@ with Tempo_Config;
 with Tempo_Tapper;
 use Tempo_Tapper;
 
---  TODO: UTF-8
-
 procedure Tempo is
    --  TODO: surely i dont have to copy paste this
    Crate_Description : constant String := "terminal tempo tapper";
