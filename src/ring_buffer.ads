@@ -64,7 +64,7 @@ private
 
    type Element_Array is array (Positive range <>) of Element;
 
-   type Ring_Index is mod Natural'Last;
+   type Ring_Index is mod 2 ** (Natural'Size - 1); --  Must be a power of two
 
    type Buffer (Max_Capacity : Capacity_Type) is
      new Buffer_Iterator_Interfaces.Reversible_Iterator
