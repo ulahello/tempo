@@ -13,7 +13,7 @@ is
    with Dynamic_Predicate => Is_Power_Of_Two (Capacity_Type);
    function Is_Power_Of_Two (N : Natural) return Boolean;
 
-   type Buffer (Max_Capacity : Capacity_Type) is tagged private;
+   type Buffer (Max_Capacity : Capacity_Type) is private;
 
    function Buffer_Init (Max_Capacity : Capacity_Type) return Buffer;
 
@@ -33,7 +33,7 @@ is
 
    procedure Clear (B : in out Buffer);
 
-   procedure Truncate_Back (B : in out Buffer; Length : Natural);
+   procedure Truncate_Back (B : in out Buffer; Max_Length : Natural);
 
 private
 
@@ -41,7 +41,7 @@ private
 
    type Ring_Index is mod 2 ** (Natural'Size - 1); --  Must be a power of two
 
-   type Buffer (Max_Capacity : Capacity_Type) is tagged record
+   type Buffer (Max_Capacity : Capacity_Type) is record
       Memory : Element_Array (1 .. Max_Capacity);
       Read   : Ring_Index;
       Write  : Ring_Index;

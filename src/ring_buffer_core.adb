@@ -30,12 +30,12 @@ is
       Index : constant Ring_Index := B.Read;
    begin
       B.Read := B.Read + 1;
-      V := B.Memory (B.Mask (Index));
+      V := B.Memory (Mask (B, Index));
    end Pop_Unchecked;
 
    procedure Push_Unchecked (B : in out Buffer; V : Element) is
    begin
-      B.Memory (B.Mask (B.Write)) := V;
+      B.Memory (Mask (B, B.Write)) := V;
       B.Write := B.Write + 1;
    end Push_Unchecked;
 
@@ -58,35 +58,35 @@ is
    is (B.Read = B.Write);
 
    function Is_Full (B : Buffer) return Boolean
-   is (B.Length = B.Max_Capacity);
+   is (Length (B) = B.Max_Capacity);
 
    function Get (B : Buffer; I : Positive) return Element is
    begin
-      if I > B.Length then
+      if I > Length (B) then
          raise Constraint_Error with "buffer index out of bounds";
       end if;
-      return B.Memory (B.Mask (B.Read + Ring_Index (I - 1)));
+      return B.Memory (Mask (B, B.Read + Ring_Index (I - 1)));
    end Get;
 
    procedure Push (B : in out Buffer; V : Element) is
       Extraneous : Element;
    begin
       --  Make room for the new element
-      if B.Is_Full then
+      if Is_Full (B) then
          --  The capacity is nonzero so the buffer is not empty
-         B.Pop_Unchecked (Extraneous);
+         Pop_Unchecked (B, Extraneous);
          pragma Unreferenced (Extraneous);
       end if;
 
-      B.Push_Unchecked (V);
+      Push_Unchecked (B, V);
    end Push;
 
    procedure Pop (B : in out Buffer; V : out Element) is
    begin
-      if B.Is_Empty then
+      if Is_Empty (B) then
          raise Constraint_Error with "tried to pop from empty buffer";
       end if;
-      B.Pop_Unchecked (V);
+      Pop_Unchecked (B, V);
    end Pop;
 
    procedure Clear (B : in out Buffer) is
@@ -94,10 +94,10 @@ is
       B.Write := B.Read;
    end Clear;
 
-   procedure Truncate_Back (B : in out Buffer; Length : Natural) is
+   procedure Truncate_Back (B : in out Buffer; Max_Length : Natural) is
    begin
-      if Length < B.Length then
-         B.Read := B.Write - Ring_Index (Length);
+      if Max_Length < Length (B) then
+         B.Read := B.Write - Ring_Index (Max_Length);
       end if;
    end Truncate_Back;
 
