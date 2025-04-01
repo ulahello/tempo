@@ -48,7 +48,7 @@ procedure Tempo is
          when Clear => "clear buffer contents",
          when Size => "adjust buffer size",
          when Bound => "toggle whether buffer is bounded to size",
-         when Print => "print buffer contents",
+         when Print => "print buffer contents in order from newest to oldest",
          when Quit => "quit");
 
    function Parse_Command (S : String) return Command is
