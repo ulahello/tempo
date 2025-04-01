@@ -47,7 +47,7 @@ procedure Tempo is
          when Tap => "register a tap",
          when Clear => "clear buffer contents",
          when Size => "adjust buffer size",
-         when Bound => "bound or unbound buffer to size",
+         when Bound => "toggle whether buffer is bounded to size",
          when Print => "print buffer contents",
          when Quit => "quit");
 
