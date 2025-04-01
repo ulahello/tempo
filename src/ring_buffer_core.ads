@@ -2,8 +2,13 @@
 
 generic
    type Element is private;
-package Ring_Buffer_Core with SPARK_Mode => On is
 
+   --  SPARK doesn't like <> (SPARK RM 4.3(1)) so we explicitly take a
+   --  placeholder value to initialize the array with.
+   Element_Placeholder : Element;
+
+package Ring_Buffer_Core with SPARK_Mode => On
+is
    subtype Capacity_Type is Natural
    with Dynamic_Predicate => Is_Power_Of_Two (Capacity_Type);
    function Is_Power_Of_Two (N : Natural) return Boolean;
