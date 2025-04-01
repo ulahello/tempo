@@ -43,7 +43,7 @@ package Ring_Buffer is
    procedure Push (B : in out Buffer; V : Element);
    function Pop (B : in out Buffer) return Element;
    procedure Clear (B : in out Buffer);
-   procedure Truncate_Back (B : in out Buffer; Length : Natural);
+   procedure Truncate_Back (B : in out Buffer; Max_Length : Natural);
 
    --  Iterable container interface
 

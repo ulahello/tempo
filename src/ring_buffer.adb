@@ -13,37 +13,37 @@ package body Ring_Buffer is
         Inner        => Core.Buffer_Init (Max_Capacity)));
 
    function Length (B : Buffer) return Natural
-   is (B.Inner.Length);
+   is (Core.Length (B.Inner));
 
    function Is_Empty (B : Buffer) return Boolean
-   is (B.Inner.Is_Empty);
+   is (Core.Is_Empty (B.Inner));
 
    function Is_Full (B : Buffer) return Boolean
-   is (B.Inner.Is_Full);
+   is (Core.Is_Full (B.Inner));
 
    function Get (B : Buffer; I : Positive) return Element
-   is (B.Inner.Get (I));
+   is (Core.Get (B.Inner, I));
 
    procedure Push (B : in out Buffer; V : Element) is
    begin
-      B.Inner.Push (V);
+      Core.Push (B.Inner, V);
    end Push;
 
    function Pop (B : in out Buffer) return Element is
       V : Element;
    begin
-      B.Inner.Pop (V);
+      Core.Pop (B.Inner, V);
       return V;
    end Pop;
 
    procedure Clear (B : in out Buffer) is
    begin
-      B.Inner.Clear;
+      Core.Clear (B.Inner);
    end Clear;
 
-   procedure Truncate_Back (B : in out Buffer; Length : Natural) is
+   procedure Truncate_Back (B : in out Buffer; Max_Length : Natural) is
    begin
-      B.Inner.Truncate_Back (Length);
+      Core.Truncate_Back (B.Inner, Max_Length);
    end Truncate_Back;
 
    --  Iterable container implementation
