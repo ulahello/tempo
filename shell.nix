@@ -1,4 +1,4 @@
 { nixpkgs ? import <nixpkgs> {} }:
 nixpkgs.mkShell {
-  nativeBuildInputs = with nixpkgs; [ gnat gprbuild alire ];
+  nativeBuildInputs = with nixpkgs; [ gnat gprbuild alire just ];
 }

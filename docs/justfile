@@ -1,0 +1,20 @@
+PREFIX := "/usr/local"
+
+default: install-manual
+
+[doc('Generate the manual page for tempo(1). Requires scdoc.')]
+build-manual:
+	echo {{PREFIX}}
+	scdoc < tempo.1.scd > tempo.1
+
+[doc('Copy the manual page to $PREFIX.')]
+install-manual: build-manual
+	mkdir -p "{{PREFIX}}/share/man/man1"
+	install -m644 tempo.1 "{{PREFIX}}/share/man/man1/tempo.1"
+
+[doc('Remove the manual page from $PREFIX.')]
+uninstall-manual:
+	rm -f "{{PREFIX}}/share/man/man1/tempo.1"
+
+clean:
+	rm -vf tempo.1
