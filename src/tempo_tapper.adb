@@ -1,6 +1,28 @@
 pragma Ada_2022;
 
+with Ada.Strings.Fixed;
+with System;
+
 package body Tempo_Tapper is
+
+   --  Samples
+
+   function Sample_Init (T : Time_Span) return Sample
+   is (60.0 / Sample (To_Duration (T)));
+
+   procedure Sample_Image
+     (Output : in out Ada.Strings.Text_Buffers.Root_Buffer_Type'Class;
+      Value  : Sample)
+   is
+      --  TODO: it should be systematically impossible for the
+      --  conversion to fail (i.e. use floats and find a crate that
+      --  formats rounded values)
+      use Ada.Strings.Fixed;
+      type Rounded is delta 10.0 ** (-1) digits System.Max_Digits;
+   begin
+      --  TODO: don't emit the extraneous space in the first place
+      Output.Put (Trim (Rounded (Value)'Image, Ada.Strings.Left));
+   end Sample_Image;
 
    --  Internals
 

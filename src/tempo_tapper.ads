@@ -4,9 +4,20 @@ with Ada.Real_Time; use Ada.Real_Time;
 with Ada.Strings.Text_Buffers;
 
 with Ring_Buffer;
-with Tempo_Sample; use Tempo_Sample;
 
 package Tempo_Tapper is
+   --  Sample type
+
+   type Sample is new Duration with Put_Image => Sample_Image;
+
+   function Sample_Init (T : Time_Span) return Sample;
+
+   procedure Sample_Image
+     (Output : in out Ada.Strings.Text_Buffers.Root_Buffer_Type'Class;
+      Value  : Sample);
+
+   --  Tempo tapper collects samples
+
    package Ring_Buffer_Instantiated is new Ring_Buffer (Element => Sample);
    use Ring_Buffer_Instantiated;
 
