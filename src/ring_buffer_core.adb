@@ -60,15 +60,17 @@ is
    function Is_Full (B : Buffer) return Boolean
    is (Length (B) = B.Max_Capacity);
 
-   function Get (B : Buffer; I : Index_Type) return Element is
+   function Get (B : Buffer; I : Index_Type) return Optional_Element is
       --  Decrement to convert from 1-based public interface to
       --  0-based Read and Write indices.
       Offset : constant Ring_Index := Ring_Index (Natural (I) - 1);
+      V      : Element;
    begin
       if I > Length (B) then
-         raise Constraint_Error with "buffer index out of bounds";
+         return (Init => False);
       end if;
-      return B.Memory (Mask (B, B.Read + Offset));
+      V := B.Memory (Mask (B, B.Read + Offset));
+      return (Init => True, V => V);
    end Get;
 
    procedure Push (B : in out Buffer; V : Element) is
@@ -84,12 +86,15 @@ is
       Push_Unchecked (B, V);
    end Push;
 
-   procedure Pop (B : in out Buffer; V : out Element) is
+   procedure Pop (B : in out Buffer; V : out Optional_Element) is
+      Value : Element;
    begin
       if Is_Empty (B) then
-         raise Constraint_Error with "tried to pop from empty buffer";
+         V := (Init => False);
+         return;
       end if;
-      Pop_Unchecked (B, V);
+      Pop_Unchecked (B, Value);
+      V := (Init => True, V => Value);
    end Pop;
 
    procedure Clear (B : in out Buffer) is

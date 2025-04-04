@@ -21,8 +21,14 @@ package body Ring_Buffer is
    function Is_Full (B : Buffer) return Boolean
    is (Core.Is_Full (B.Inner));
 
-   function Get (B : Buffer; I : Positive) return Element
-   is (Core.Get (B.Inner, I));
+   function Get (B : Buffer; I : Positive) return Element is
+      V : constant Core.Optional_Element := Core.Get (B.Inner, I);
+   begin
+      if not V.Init then
+         raise Constraint_Error with "buffer index out of bounds";
+      end if;
+      return V.V;
+   end Get;
 
    procedure Push (B : in out Buffer; V : Element) is
    begin
@@ -30,10 +36,13 @@ package body Ring_Buffer is
    end Push;
 
    function Pop (B : in out Buffer) return Element is
-      V : Element;
+      V : Core.Optional_Element;
    begin
       Core.Pop (B.Inner, V);
-      return V;
+      if not V.Init then
+         raise Constraint_Error with "tried to pop from empty buffer";
+      end if;
+      return V.V;
    end Pop;
 
    procedure Clear (B : in out Buffer) is
