@@ -9,16 +9,6 @@ generic
 
 package Ring_Buffer_Core with SPARK_Mode => On
 is
-   type Optional_Element (Init : Boolean := False) is record
-      case Init is
-         when True =>
-            V : Element;
-
-         when False =>
-            null;
-      end case;
-   end record;
-
    Max_Max_Capacity : constant := 2 ** (Natural'Size - 1);
 
    subtype Index_Type is Positive range 1 .. Max_Max_Capacity;
@@ -40,11 +30,13 @@ is
 
    function Is_Full (B : Buffer) return Boolean;
 
-   function Get (B : Buffer; I : Index_Type) return Optional_Element;
+   function Get (B : Buffer; I : Index_Type) return Element
+   with Pre => I in 1 .. Length (B);
 
    procedure Push (B : in out Buffer; V : Element);
 
-   procedure Pop (B : in out Buffer; V : out Optional_Element);
+   procedure Pop (B : in out Buffer; V : out Element)
+   with Pre => not Is_Empty (B);
 
    procedure Clear (B : in out Buffer);
 

@@ -26,13 +26,6 @@ is
    is (1 + (Natural (I) mod B.Max_Capacity))
    with Post => Mask'Result in 1 .. B.Max_Capacity;
 
-   procedure Pop_Unchecked (B : in out Buffer; V : out Element) is
-      Index : constant Ring_Index := B.Read;
-   begin
-      B.Read := B.Read + 1;
-      V := B.Memory (Mask (B, Index));
-   end Pop_Unchecked;
-
    procedure Push_Unchecked (B : in out Buffer; V : Element) is
    begin
       B.Memory (Mask (B, B.Write)) := V;
@@ -60,17 +53,12 @@ is
    function Is_Full (B : Buffer) return Boolean
    is (Length (B) = B.Max_Capacity);
 
-   function Get (B : Buffer; I : Index_Type) return Optional_Element is
+   function Get (B : Buffer; I : Index_Type) return Element is
       --  Decrement to convert from 1-based public interface to
       --  0-based Read and Write indices.
       Offset : constant Ring_Index := Ring_Index (Natural (I) - 1);
-      V      : Element;
    begin
-      if I > Length (B) then
-         return (Init => False);
-      end if;
-      V := B.Memory (Mask (B, B.Read + Offset));
-      return (Init => True, V => V);
+      return B.Memory (Mask (B, B.Read + Offset));
    end Get;
 
    procedure Push (B : in out Buffer; V : Element) is
@@ -79,22 +67,18 @@ is
       --  Make room for the new element
       if Is_Full (B) then
          --  The capacity is nonzero so the buffer is not empty
-         Pop_Unchecked (B, Extraneous);
+         Pop (B, Extraneous);
          pragma Unreferenced (Extraneous);
       end if;
 
       Push_Unchecked (B, V);
    end Push;
 
-   procedure Pop (B : in out Buffer; V : out Optional_Element) is
-      Value : Element;
+   procedure Pop (B : in out Buffer; V : out Element) is
+      Index : constant Ring_Index := B.Read;
    begin
-      if Is_Empty (B) then
-         V := (Init => False);
-         return;
-      end if;
-      Pop_Unchecked (B, Value);
-      V := (Init => True, V => Value);
+      B.Read := B.Read + 1;
+      V := B.Memory (Mask (B, Index));
    end Pop;
 
    procedure Clear (B : in out Buffer) is
