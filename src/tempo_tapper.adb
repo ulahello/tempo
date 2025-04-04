@@ -73,7 +73,7 @@ package body Tempo_Tapper is
             S       : constant Sample := Sample_Init (Elapsed);
          begin
             --  Push the new BPM sample and remove old elements
-            T.Samples.Push (S);
+            T.Samples.Push_Out (S);
             T.Sync_Capacity;
          end;
       end if;

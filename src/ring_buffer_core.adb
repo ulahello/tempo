@@ -26,12 +26,6 @@ is
    is (1 + (Natural (I) mod B.Max_Capacity))
    with Post => Mask'Result in 1 .. B.Max_Capacity;
 
-   procedure Push_Unchecked (B : in out Buffer; V : Element) is
-   begin
-      B.Memory (Mask (B, B.Write)) := V;
-      B.Write := B.Write + 1;
-   end Push_Unchecked;
-
    --  Public interface
 
    function Buffer_Init (Max_Capacity : Capacity_Type) return Buffer is
@@ -62,6 +56,12 @@ is
    end Get;
 
    procedure Push (B : in out Buffer; V : Element) is
+   begin
+      B.Memory (Mask (B, B.Write)) := V;
+      B.Write := B.Write + 1;
+   end Push;
+
+   procedure Push_Out (B : in out Buffer; V : Element) is
       Extraneous : Element;
    begin
       --  Make room for the new element
@@ -71,8 +71,8 @@ is
          pragma Unreferenced (Extraneous);
       end if;
 
-      Push_Unchecked (B, V);
-   end Push;
+      Push (B, V);
+   end Push_Out;
 
    procedure Pop (B : in out Buffer; V : out Element) is
       Index : constant Ring_Index := B.Read;

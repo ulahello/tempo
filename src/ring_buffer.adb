@@ -29,10 +29,10 @@ package body Ring_Buffer is
       return Core.Get (B.Inner, I);
    end Get;
 
-   procedure Push (B : in out Buffer; V : Element) is
+   procedure Push_Out (B : in out Buffer; V : Element) is
    begin
-      Core.Push (B.Inner, V);
-   end Push;
+      Core.Push_Out (B.Inner, V);
+   end Push_Out;
 
    function Pop (B : in out Buffer) return Element is
       V : Element;

@@ -40,7 +40,7 @@ package Ring_Buffer is
    function Is_Empty (B : Buffer) return Boolean;
    function Is_Full (B : Buffer) return Boolean;
    function Get (B : Buffer; I : Positive) return Element;
-   procedure Push (B : in out Buffer; V : Element);
+   procedure Push_Out (B : in out Buffer; V : Element);
    function Pop (B : in out Buffer) return Element;
    procedure Clear (B : in out Buffer);
    procedure Truncate_Back (B : in out Buffer; Max_Length : Natural);

@@ -33,7 +33,11 @@ is
    function Get (B : Buffer; I : Index_Type) return Element
    with Pre => I in 1 .. Length (B);
 
-   procedure Push (B : in out Buffer; V : Element);
+   procedure Push (B : in out Buffer; V : Element)
+   with Pre => not Is_Full (B);
+
+   --  Like Push, but will Pop to make room for the element.
+   procedure Push_Out (B : in out Buffer; V : Element);
 
    procedure Pop (B : in out Buffer; V : out Element)
    with Pre => not Is_Empty (B);
