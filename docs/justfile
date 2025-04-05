@@ -1,6 +1,6 @@
 PREFIX := "/usr/local"
 
-default: install-manual
+default: build-manual
 
 [doc('Generate the manual page for tempo(1). Requires scdoc.')]
 build-manual:
