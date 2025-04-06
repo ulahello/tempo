@@ -1,7 +1,5 @@
 PREFIX := "/usr/local"
 
-default: build
-
 [doc('Generate the manual page for tempo(1). Requires scdoc.')]
 build:
 	scdoc < tempo.1.scd > tempo.1
@@ -15,5 +13,6 @@ install: build
 uninstall:
 	rm -f "{{PREFIX}}/share/man/man1/tempo.1"
 
+[doc('Remove local build artifacts.')]
 clean:
 	rm -vf tempo.1
