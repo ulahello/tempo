@@ -28,7 +28,7 @@ When the buffer has too many samples, the newest are kept.
 :  Describe commands
 |  Tap
 :  <Enter>
-:  Register a tap
+:  Register a beat
 |  Clear
 :  c
 :  Clear buffer contents

@@ -44,7 +44,7 @@ procedure Tempo is
    function Command_Description (C : Valid_Command) return String
    is (case C is
          when Help => "describe commands",
-         when Tap => "register a tap",
+         when Tap => "register a beat",
          when Clear => "clear buffer contents",
          when Size => "adjust buffer size",
          when Bound => "toggle whether buffer is bounded to size",
