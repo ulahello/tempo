@@ -1,3 +1,5 @@
+--  SPDX-License-Identifier: MPL-2.0
+
 pragma Ada_2022;
 
 with Ada.Real_Time; use Ada.Real_Time;

@@ -1,5 +1,7 @@
 tempo(1)
 
+; SPDX-License-Identifier: MPL-2.0
+
 # NAME
 
 tempo - tempo tapper

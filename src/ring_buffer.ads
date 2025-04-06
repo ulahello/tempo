@@ -1,3 +1,5 @@
+--  SPDX-License-Identifier: MPL-2.0
+
 with Ada.Iterator_Interfaces;
 
 --  TODO: i should not implement a ring buffer / queue and instead
