@@ -4,7 +4,6 @@ default: build
 
 [doc('Generate the manual page for tempo(1). Requires scdoc.')]
 build:
-	echo {{PREFIX}}
 	scdoc < tempo.1.scd > tempo.1
 
 [doc('Copy the manual page to $PREFIX.')]
