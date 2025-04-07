@@ -17,6 +17,9 @@ procedure Tempo is
    --  TODO: surely i dont have to copy paste this
    Crate_Description : constant String := "terminal tempo tapper";
 
+   Default_Buffer_Size : constant Natural := 10;
+   Default_Bounded     : constant Boolean := True;
+
    type Command is (Help, Tap, Clear, Size, Bound, Print, Quit, Invalid);
    subtype Valid_Command is Command
    with Static_Predicate => Valid_Command not in Invalid;
@@ -167,9 +170,6 @@ procedure Tempo is
       Put_Line (" goodbye");
       Put_Line ("");
    end Do_Quit;
-
-   Default_Buffer_Size : constant Natural := 10;
-   Default_Bounded     : constant Boolean := True;
 
    T : Tapper := Tapper_Init (Default_Buffer_Size, Default_Bounded);
 
