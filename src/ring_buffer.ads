@@ -1,24 +1,26 @@
 --  SPDX-License-Identifier: MPL-2.0
 
-with Ada.Iterator_Interfaces;
+--  Generic bounded ring buffer
 
 --  TODO: i should not implement a ring buffer / queue and instead
 --  should use an existing implementation... which exists, right?
 
+with Ada.Iterator_Interfaces;
+
+with Ring_Buffer_Core;
+
 generic
    type Element is private;
 package Ring_Buffer is
-
-   subtype Capacity_Type is Natural
-   with Dynamic_Predicate => Is_Power_Of_Two (Capacity_Type);
-   function Is_Power_Of_Two (N : Natural) return Boolean;
+   package Core is new Ring_Buffer_Core (Element);
+   subtype Capacity_Type is Core.Capacity_Type;
 
    --  Buffer is an iterator
    type Cursor (Length : Natural) is record
       Index : Natural;
    end record;
-
    function Has_Element (Position : Cursor) return Boolean;
+
    package Buffer_Iterator_Interfaces is new
      Ada.Iterator_Interfaces (Cursor, Has_Element);
 
@@ -64,16 +66,10 @@ package Ring_Buffer is
 
 private
 
-   type Element_Array is array (Positive range <>) of Element;
-
-   type Ring_Index is mod 2 ** (Natural'Size - 1); --  Must be a power of two
-
    type Buffer (Max_Capacity : Capacity_Type) is
      new Buffer_Iterator_Interfaces.Reversible_Iterator
    with record
-      Memory : Element_Array (1 .. Max_Capacity);
-      Read   : Ring_Index;
-      Write  : Ring_Index;
+      Inner : Core.Buffer (Max_Capacity);
    end record;
 
 end Ring_Buffer;
