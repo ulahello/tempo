@@ -3,6 +3,6 @@ nixpkgs.mkShell {
   nativeBuildInputs = with nixpkgs;
     [ alire
       gnat14 gnat14Packages.gprbuild
-      gnat14Packages.gnatprove
+      gnat14Packages.gnatprove z3 cvc5
       just scdoc ];
 }

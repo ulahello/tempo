@@ -19,12 +19,12 @@ is
       return False;
    end Is_Power_Of_Two;
 
-   --  The Read and Write indices are 0-based because the math is
-   --  nicer, but since I can't specify the array index as
-   --  `(0 .. Discriminant - 1)`, the actual array is 1-based, so I
-   --  have to translate here.
-   function Mask (B : Buffer; I : Ring_Index) return Natural
-   is (1 + Integer (I mod Ring_Index (B.Max_Capacity)));
+   --  Convert from 0-based Read and Write indices to 1-based array. I
+   --  also convert to signed integers prior to mod due to
+   --  https://github.com/AdaCore/spark2014/issues/57.
+   function Mask (B : Buffer; I : Ring_Index) return Index_Type
+   is (1 + (Natural (I) mod B.Max_Capacity))
+   with Post => Mask'Result in 1 .. B.Max_Capacity;
 
    procedure Pop_Unchecked (B : in out Buffer; V : out Element) is
       Index : constant Ring_Index := B.Read;
@@ -51,8 +51,8 @@ is
       return Buffer_Empty;
    end Buffer_Init;
 
-   function Length (B : Buffer) return Natural
-   is (Natural (B.Write - B.Read));
+   function Length (B : Buffer) return Length_Type
+   is (Length_Type (B.Write - B.Read));
 
    function Is_Empty (B : Buffer) return Boolean
    is (B.Read = B.Write);
@@ -60,12 +60,15 @@ is
    function Is_Full (B : Buffer) return Boolean
    is (Length (B) = B.Max_Capacity);
 
-   function Get (B : Buffer; I : Positive) return Element is
+   function Get (B : Buffer; I : Index_Type) return Element is
+      --  Decrement to convert from 1-based public interface to
+      --  0-based Read and Write indices.
+      Offset : constant Ring_Index := Ring_Index (Natural (I) - 1);
    begin
       if I > Length (B) then
          raise Constraint_Error with "buffer index out of bounds";
       end if;
-      return B.Memory (Mask (B, B.Read + Ring_Index (I - 1)));
+      return B.Memory (Mask (B, B.Read + Offset));
    end Get;
 
    procedure Push (B : in out Buffer; V : Element) is
@@ -94,7 +97,7 @@ is
       B.Write := B.Read;
    end Clear;
 
-   procedure Truncate_Back (B : in out Buffer; Max_Length : Natural) is
+   procedure Truncate_Back (B : in out Buffer; Max_Length : Length_Type) is
    begin
       if Max_Length < Length (B) then
          B.Read := B.Write - Ring_Index (Max_Length);
