@@ -11,8 +11,9 @@ with Ring_Buffer_Core;
 
 generic
    type Element is private;
+   Element_Placeholder : Element;
 package Ring_Buffer is
-   package Core is new Ring_Buffer_Core (Element);
+   package Core is new Ring_Buffer_Core (Element, Element_Placeholder);
    subtype Capacity_Type is Core.Capacity_Type;
 
    --  Buffer is an iterator

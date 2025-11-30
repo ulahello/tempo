@@ -6,10 +6,9 @@ with Ada.Real_Time; use Ada.Real_Time;
 with Ada.Strings.Text_Buffers;
 
 with Ring_Buffer;
+with Ring_Buffer_Core;
 
 package Tempo_Tapper is
-   --  Sample type
-
    type Sample is new Duration with Put_Image => Sample_Image;
 
    function Sample_Init (T : Time_Span) return Sample;
@@ -18,9 +17,23 @@ package Tempo_Tapper is
      (Output : in out Ada.Strings.Text_Buffers.Root_Buffer_Type'Class;
       Value  : Sample);
 
-   --  Tempo tapper collects samples
+   --  Generic packages can't be directly proven[1]. Since Ring_Buffer
+   --  cannot be SPARK (its Buffer extends Reversible_Iterator), its
+   --  instantiation of Ring_Buffer_Core will not be checked. Instead, I
+   --  artificially instantiate the package.
+   --
+   --  [1]: https://docs.adacore.com/spark2014-docs/html/lrm/generic-units.html
+   package Please_Prove_Me
+     with SPARK_Mode => On
+   is
+      package Core is new
+        Ring_Buffer_Core
+          (Element             => Sample,
+           Element_Placeholder => Sample (0));
+   end Please_Prove_Me;
 
-   package Ring_Buffer_Instantiated is new Ring_Buffer (Element => Sample);
+   package Ring_Buffer_Instantiated is new
+     Ring_Buffer (Element => Sample, Element_Placeholder => Sample (0));
    use Ring_Buffer_Instantiated;
 
    Max_Capacity : Capacity_Type := 16#1000#;

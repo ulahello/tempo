@@ -3,5 +3,6 @@ nixpkgs.mkShell {
   nativeBuildInputs = with nixpkgs; [
     gnat gprbuild alire
     just scdoc
+    gnatprove
   ];
 }

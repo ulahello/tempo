@@ -2,7 +2,9 @@ pragma Ada_2022;
 
 --  TODO: tests and/or proof
 
-package body Ring_Buffer_Core is
+package body Ring_Buffer_Core
+  with SPARK_Mode => On
+is
 
    --  Internals
 
@@ -42,7 +44,7 @@ package body Ring_Buffer_Core is
    function Buffer_Init (Max_Capacity : Capacity_Type) return Buffer is
       Buffer_Empty : constant Buffer :=
         (Max_Capacity => Max_Capacity,
-         Memory       => [others => <>],
+         Memory       => [others => Element_Placeholder],
          Read         => 0,
          Write        => 0);
    begin
