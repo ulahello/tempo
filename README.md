@@ -1,5 +1,3 @@
-*Note!* this is literally the first Ada code I've written so please bear with me as I stumble through idioms.
-
 # tempo
 
 `tempo` is a tempo tapper that runs in the terminal as a shell.
@@ -46,29 +44,10 @@ new samples inserted here       old samples removed here
 
 ## Installation
 
-`tempo` is written in Ada and uses the [Alire](https://alire.ada.dev/docs/#installation) package manager.
+I've written `tempo` in several languages for learning and joy purposes.
+See [`/langs`](./langs) for each variant, and check their respective `INSTALL.md` for instructions.
 
-After installing Alire, make sure to select a compiler toolchain.
-Alire can automatically download versions of [GNAT](https://www.gnu.org/software/gnat/) if you don't have a system-wide installation.
-
-```console
-$ alr toolchain --select
-...
-```
-
-Then, to build `tempo`,
-
-```console
-$ alr build
-```
-
-This produces an executable in the `bin` directory.
-
-To install,
-
-```console
-$ alr install --prefix FIXME
-```
+- [Ada](./langs/ada)
 
 ### Documentation
 
