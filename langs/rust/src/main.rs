@@ -225,11 +225,11 @@ impl Command {
     pub const fn description(self) -> &'static str {
         match self {
             Self::Help => "describe commands",
-            Self::Tap => "register a tap",
+            Self::Tap => "register a beat",
             Self::Clear => "clear buffer contents",
             Self::Size => "adjust buffer size",
-            Self::Bound => "bound or unbound buffer to size",
-            Self::Print => "print buffer contents",
+            Self::Bound => "toggle whether buffer is bounded to size",
+            Self::Print => "print buffer contents in order from newest to oldest",
             Self::Quit => "quit",
         }
     }
