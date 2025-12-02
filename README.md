@@ -48,6 +48,7 @@ I've written `tempo` in several languages for learning and joy purposes.
 See [`/langs`](./langs) for each variant, and check their respective `INSTALL.md` for instructions.
 
 - [Ada](./langs/ada)
+- [Rust](./langs/rust)
 
 ### Documentation
 

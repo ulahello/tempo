@@ -1,0 +1,13 @@
+[package]
+name = "tempo_tapper"
+version = "0.1.0"
+authors = ["Ula Shipman <ula.hello@mailbox.org>"]
+edition = "2021"
+rust-version = "1.61.0"
+description = "terminal tempo tapper"
+license = "MPL-2.0"
+publish = false
+
+[[bin]]
+name = "tempo"
+path = "src/main.rs"
