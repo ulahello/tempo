@@ -1,28 +1,31 @@
 use math;
 
-export def MAX_CAP: u16 = 0x1000;
-
 export type buffer = struct {
-	items: [MAX_CAP]f32,
+	items: []f32,
 	start: u16,
 	end: u16,
 };
 
-export fn new() buffer = {
+export fn new(capacity: u16) buffer = {
 	return buffer {
-		items = [math::NAN...],
+		items = alloc([math::NAN...], capacity),
 		start = 0,
 		end = 0,
 	};
 };
 
+export fn buffer_free(buf: *buffer) void = {
+	free(buf.items);
+};
+
 export fn length(buf: *const buffer) u16 = buf.end - buf.start;
+export fn capacity(buf: *const buffer) u16 = len(buf.items): u16;
 export fn is_empty(buf: *const buffer) bool = buf.start == buf.end;
-export fn is_full(buf: *const buffer) bool = length(buf) == MAX_CAP;
+export fn is_full(buf: *const buffer) bool = length(buf) == capacity(buf);
 
 export fn get(buf: *const buffer, index: u16) f32 = {
 	assert(index < length(buf), "index out of bounds");
-	return buf.items[mask(buf.start + index)];
+	return buf.items[mask(buf, buf.start + index)];
 };
 
 export fn push(buf: *buffer, elem: f32) void = {
@@ -44,17 +47,17 @@ export fn truncate_back(buf: *buffer, new_len: u16) void = {
 
 fn push_unchecked(buf: *buffer, elem: f32) void = {
 	assert(!is_full(buf));
-	buf.items[mask(buf.end)] = elem;
+	buf.items[mask(buf, buf.end)] = elem;
 	buf.end += 1;
 };
 
 fn pop_unchecked(buf: *buffer) f32 = {
 	assert(!is_empty(buf));
-	const src = mask(buf.start);
+	const src = mask(buf, buf.start);
 	const elem = buf.items[src];
 	buf.items[src] = math::NAN;
 	buf.start += 1;
 	return elem;
 };
 
-fn mask(idx: u16) u16 = idx % MAX_CAP;
+fn mask(buf: *const buffer, idx: u16) u16 = idx % capacity(buf);

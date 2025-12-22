@@ -167,7 +167,8 @@ fn interactive_resize(tapper: *const tapper::tapper) (void | io::error) = {
 };
 
 fn repl() (void | encoding::utf8::invalid | io::error) = {
-	let tapper = tapper::new_tapper(DEFAULT_CAPACITY, DEFAULT_BOUNDED);
+	let tapper = tapper::new(DEFAULT_CAPACITY, DEFAULT_BOUNDED);
+	defer tapper::tapper_free(&tapper);
 
 	// Print splash text
 	print_splash()?;
