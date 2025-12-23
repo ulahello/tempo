@@ -20,9 +20,9 @@ fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 	assert(eq_slice(&buf, [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]));
 	assert(is_full(&buf));
 
-	assert(pop_unchecked(&buf) == 0.0);
-	assert(pop_unchecked(&buf) == 1.0);
-	assert(pop_unchecked(&buf) == 2.0);
+	assert(pop(&buf) == 0.0);
+	assert(pop(&buf) == 1.0);
+	assert(pop(&buf) == 2.0);
 	assert(eq_slice(&buf, [3.0, 4.0, 5.0, 6.0, 7.0]));
 };
 
@@ -44,9 +44,9 @@ fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 		push(&buf, 9.0);
 		push(&buf, 16.0);
 		assert(length(&buf) == 3);
-		assert(pop_unchecked(&buf) == 4.0);
-		assert(pop_unchecked(&buf) == 9.0);
-		assert(pop_unchecked(&buf) == 16.0);
+		assert(pop(&buf) == 4.0);
+		assert(pop(&buf) == 9.0);
+		assert(pop(&buf) == 16.0);
 	};
 	assert(is_empty(&buf));
 };
@@ -57,7 +57,7 @@ fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 		push(&buf, i: f32 * 1.0);
 		push(&buf, i: f32 * 2.0);
 		push(&buf, i: f32 * 3.0);
-		pop_unchecked(&buf);
+		pop(&buf);
 	};
 	assert(!is_empty(&buf));
 	clear(&buf);

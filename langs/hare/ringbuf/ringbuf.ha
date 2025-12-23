@@ -30,9 +30,24 @@ export fn get(buf: *const buffer, index: u16) f32 = {
 
 export fn push(buf: *buffer, elem: f32) void = {
 	if (is_full(buf)) {
-		pop_unchecked(buf);
+		pop(buf);
 	};
-	push_unchecked(buf, elem);
+	push_strict(buf, elem);
+};
+
+export fn push_strict(buf: *buffer, elem: f32) void = {
+	assert(!is_full(buf));
+	buf.items[mask(buf, buf.end)] = elem;
+	buf.end += 1;
+};
+
+export fn pop(buf: *buffer) f32 = {
+	assert(!is_empty(buf));
+	const src = mask(buf, buf.start);
+	const elem = buf.items[src];
+	buf.items[src] = math::NAN;
+	buf.start += 1;
+	return elem;
 };
 
 export fn clear(buf: *buffer) void = {
@@ -43,21 +58,6 @@ export fn truncate_back(buf: *buffer, new_len: u16) void = {
 	if (new_len < length(buf)) {
 		buf.start = buf.end - new_len;
 	};
-};
-
-fn push_unchecked(buf: *buffer, elem: f32) void = {
-	assert(!is_full(buf));
-	buf.items[mask(buf, buf.end)] = elem;
-	buf.end += 1;
-};
-
-fn pop_unchecked(buf: *buffer) f32 = {
-	assert(!is_empty(buf));
-	const src = mask(buf, buf.start);
-	const elem = buf.items[src];
-	buf.items[src] = math::NAN;
-	buf.start += 1;
-	return elem;
 };
 
 fn mask(buf: *const buffer, idx: u16) u16 = idx % capacity(buf);
