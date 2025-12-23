@@ -1,6 +1,6 @@
 use types;
 
-fn eq_slice(lhs: *const buffer, rhs: []f32) bool = {
+fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 	if (length(lhs) != len(rhs)) {
 		return false;
 	};

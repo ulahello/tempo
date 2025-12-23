@@ -1,5 +1,3 @@
-// TODOO: tests
-
 use ascii;
 use encoding::utf8;
 use fmt;
