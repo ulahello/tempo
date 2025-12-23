@@ -7,6 +7,7 @@ export type buffer = struct {
 };
 
 export fn new(capacity: u16) buffer = {
+	assert(math::popcount(capacity) == 1, "ringbuf capacity must be power of two");
 	return buffer {
 		items = alloc([math::NAN...], capacity),
 		start = 0,
