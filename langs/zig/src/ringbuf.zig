@@ -278,12 +278,12 @@ test "truncate front" {
     var buf = (try RingBuf(T, CAP)).init();
     try buf.fromSlice(&[_]T{ 1, 2, 3, 4, 5, 6, 7, 8 });
     try testing.expect(buf.eql(&[_]T{ 1, 2, 3, 4, 5, 6, 7, 8 }));
-    buf.truncateFront(4);
-    try testing.expect(buf.eql(&[_]T{ 1, 2, 3, 4 }));
-    buf.truncateFront(4);
-    try testing.expect(buf.eql(&[_]T{ 1, 2, 3, 4 }));
+    buf.truncateFront(3);
+    try testing.expect(buf.eql(&[_]T{ 1, 2, 3 }));
+    buf.truncateFront(3);
+    try testing.expect(buf.eql(&[_]T{ 1, 2, 3 }));
     buf.truncateFront(100);
-    try testing.expect(buf.eql(&[_]T{ 1, 2, 3, 4 }));
+    try testing.expect(buf.eql(&[_]T{ 1, 2, 3 }));
 }
 
 test "truncate back" {
@@ -292,10 +292,10 @@ test "truncate back" {
     var buf = (try RingBuf(T, CAP)).init();
     try buf.fromSlice(&[_]T{ 1, 2, 3, 4, 5, 6, 7, 8 });
     try testing.expect(buf.eql(&[_]T{ 1, 2, 3, 4, 5, 6, 7, 8 }));
-    buf.truncateBack(4);
-    try testing.expect(buf.eql(&[_]T{ 5, 6, 7, 8 }));
+    buf.truncateBack(3);
+    try testing.expect(buf.eql(&[_]T{ 6, 7, 8 }));
     buf.truncateBack(100);
-    try testing.expect(buf.eql(&[_]T{ 5, 6, 7, 8 }));
+    try testing.expect(buf.eql(&[_]T{ 6, 7, 8 }));
 }
 
 test "eql" {

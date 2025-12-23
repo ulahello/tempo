@@ -86,20 +86,20 @@ mod ringbuf {
     fn truncate_front() {
         const CAP: usize = 8;
         let mut buf: RingBuf<usize, CAP> = RingBuf::from_iter([1, 2, 3, 4, 5, 6, 7, 8]);
-        buf.truncate_front(4);
-        assert_eq!(buf, [1, 2, 3, 4]);
+        buf.truncate_front(3);
+        assert_eq!(buf, [1, 2, 3]);
         buf.truncate_front(100);
-        assert_eq!(buf, [1, 2, 3, 4]);
+        assert_eq!(buf, [1, 2, 3]);
     }
 
     #[test]
     fn truncate_back() {
         const CAP: usize = 8;
         let mut buf: RingBuf<usize, CAP> = RingBuf::from_iter([1, 2, 3, 4, 5, 6, 7, 8]);
-        buf.truncate_back(4);
-        assert_eq!(buf, [5, 6, 7, 8]);
+        buf.truncate_back(3);
+        assert_eq!(buf, [6, 7, 8]);
         buf.truncate_back(100);
-        assert_eq!(buf, [5, 6, 7, 8]);
+        assert_eq!(buf, [6, 7, 8]);
     }
 
     #[test]
