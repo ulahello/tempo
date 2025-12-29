@@ -78,7 +78,7 @@ fn tryMain(stdin: *Io.Reader, stdout: *Io.Writer, stderr: *Io.Writer) TempoError
             if (tapper.isBounded()) "" else "+",
         });
         try tap.formatBpm(stdout, tapper.bpm());
-        try stdout.print(" bpm\n", .{});
+        try stdout.print(" BPM\n", .{});
 
         const try_cmd = if (try readln(
             stdin,
@@ -116,7 +116,7 @@ fn tryMain(stdin: *Io.Reader, stdout: *Io.Writer, stderr: *Io.Writer) TempoError
                         switch (err) {
                             fmt.ParseIntError.Overflow => try_cap = math.maxInt(rb.Idx),
                             fmt.ParseIntError.InvalidCharacter => {
-                                try stdout.print(" invalid character in integer\n", .{});
+                                try stdout.print(" invalid integer\n", .{});
                             },
                         }
                     }

@@ -111,7 +111,7 @@ fn try_main<W: Write>(mut stdout: W) -> io::Result<()> {
                             if *error.kind() == IntErrorKind::PosOverflow {
                                 Some(u16::MAX)
                             } else {
-                                writeln!(stdout, " {error}")?;
+                                writeln!(stdout, " invalid integer")?;
                                 None
                             }
                         }
