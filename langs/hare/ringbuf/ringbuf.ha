@@ -1,3 +1,5 @@
+// TODO: implement iterator
+
 use math;
 
 export type buffer = struct {

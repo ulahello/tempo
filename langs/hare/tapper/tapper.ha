@@ -64,10 +64,9 @@ export fn toggle_bounded(self: *tapper) void = {
 
 export fn bpm(self: *const tapper) f32 = {
 	let avg: f32 = 0.0;
-	for (let idx: u16 = 0; idx < ringbuf::length(&self.buffer); idx += 1) {
-		const sample = ringbuf::get(&self.buffer, idx);
-		const div = idx + 1;
-		avg += (sample - avg) / (div: f32);
+	for (let idx: u16 = 1; idx <= ringbuf::length(&self.buffer); idx += 1) {
+		const sample = ringbuf::get(&self.buffer, idx - 1);
+		avg += (sample - avg) / (idx: f32);
 	};
 	return avg;
 };
