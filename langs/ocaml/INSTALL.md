@@ -1,10 +1,11 @@
-TODO
+# Installing the OCaml variant
 
-- TODO: use dune
+Install [OCaml](https://ocaml.org/) and [Dune](https://dune.build/).
+
 - TODO: add tests
 
-To run,
+To build and install,
 
 ```console
-$ OCAMLRUNPARAM="b" ocaml unix.cma ./tempo.ml
+$ dune install --prefix FIXME
 ```
