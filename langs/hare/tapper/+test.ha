@@ -37,11 +37,10 @@ fn tostr(t: *const tapper) str = {
         assert("[121.1, 112.4, 120.1]" == tostr(&t));
 
 	ringbuf::clear(&t.buffer);
+        assert("[]" == tostr(&t));
+
 	ringbuf::push(&t.buffer, 112.76);
         assert("[112.8]" == tostr(&t));
-
-	ringbuf::clear(&t.buffer);
-        assert("[]" == tostr(&t));
 };
 
 @test fn is_recording() void = {

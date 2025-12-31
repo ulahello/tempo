@@ -183,11 +183,10 @@ mod tap {
         assert_eq!("[121.11, 112.41, 120.05]", format!("{tapper:.2}"));
 
         tapper.buf.clear();
+        assert_eq!("[]", format!("{tapper}"));
+
         tapper.buf.push(112.76);
         assert_eq!("[112.8]", format!("{tapper:.1}"));
-
-        tapper.buf.clear();
-        assert_eq!("[]", format!("{tapper}"));
     }
 
     #[test]

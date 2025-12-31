@@ -176,22 +176,21 @@ test "formatTapper" {
     );
     try testing.expect(std.mem.eql(u8, buf.written(), "[121.1, 112.4, 120.1]"));
 
-    buf.clearRetainingCapacity();
     tapper.buf.clear();
-    tapper.buf.push(112.76);
-    try formatTapper(
-        &buf.writer,
-        &tapper,
-    );
-    try testing.expect(std.mem.eql(u8, buf.written(), "[112.8]"));
-
     buf.clearRetainingCapacity();
-    tapper.buf.clear();
     try formatTapper(
         &buf.writer,
         &tapper,
     );
     try testing.expect(std.mem.eql(u8, buf.written(), "[]"));
+
+    tapper.buf.push(112.76);
+    buf.clearRetainingCapacity();
+    try formatTapper(
+        &buf.writer,
+        &tapper,
+    );
+    try testing.expect(std.mem.eql(u8, buf.written(), "[112.8]"));
 }
 
 test "count" {
