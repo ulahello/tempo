@@ -49,6 +49,7 @@ let fold f init t =
   let front_acc = List.fold_left f init t.front in
   List.fold_left f front_acc (List.rev t.back)
 
+let to_list t = t.front @ List.rev t.back
+
 let string_of_queue fmt t =
-  let xs : 'a list = t.front @ List.rev t.back in
-  "[" ^ String.concat ", " (List.map fmt xs) ^ "]"
+  "[" ^ String.concat ", " (List.map fmt (to_list t)) ^ "]"

@@ -12,4 +12,5 @@ val clear : 'a t -> 'a t
 val rev : 'a t -> 'a t
 val truncate_back : 'a t -> int -> 'a t
 val fold : ('acc -> 'a -> 'acc) -> 'acc -> 'a t -> 'acc
+val to_list : 'a t -> 'a list
 val string_of_queue : ('a -> string) -> 'a t -> string
