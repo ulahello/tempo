@@ -14,13 +14,13 @@ let count t = Pqueue.length t.samples
 let capacity t = min t.capacity (Pqueue.capacity t.samples)
 let is_recording t = not (t.prev_tap = None)
 let is_bounded t = t.bounded
-let toggle_bounded t = { t with bounded = not t.bounded }
 
 let sync_cap t =
   if is_bounded t then
     { t with samples = Pqueue.truncate_back t.samples (capacity t) }
   else t
 
+let toggle_bounded t = sync_cap { t with bounded = not t.bounded }
 let clear t = { t with samples = Pqueue.clear t.samples; prev_tap = None }
 let resize t new_cap = sync_cap { t with capacity = new_cap }
 
