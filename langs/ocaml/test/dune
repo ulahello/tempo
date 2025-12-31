@@ -1,2 +1,3 @@
 (test
- (name test_tempo))
+ (name test_tempo)
+ (libraries tempo alcotest))

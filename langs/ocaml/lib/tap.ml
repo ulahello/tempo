@@ -23,6 +23,7 @@ let sync_cap t =
 let toggle_bounded t = sync_cap { t with bounded = not t.bounded }
 let clear t = { t with samples = Pqueue.clear t.samples; prev_tap = None }
 let resize t new_cap = sync_cap { t with capacity = new_cap }
+let push_bpm t bpm = sync_cap { t with samples = Pqueue.push t.samples bpm }
 
 let tap t =
   let now = Unix.gettimeofday () in
@@ -33,8 +34,7 @@ let tap t =
         if prev < now then
           let elapsed_secs = now -. prev in
           let bpm = 60.0 /. elapsed_secs in
-          let t = { t with samples = Pqueue.push t.samples bpm } in
-          sync_cap t
+          push_bpm t bpm
         else t
   in
   { t with prev_tap = Some now }
@@ -54,3 +54,5 @@ let string_of_sample s = Printf.sprintf "%.1f" s
 
 let string_of_tapper t =
   Pqueue.string_of_queue string_of_sample (Pqueue.rev t.samples)
+
+let to_list t = Pqueue.to_list (Pqueue.rev t.samples)
