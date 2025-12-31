@@ -90,7 +90,7 @@ fn tostr(t: *const tapper) str = {
 	assert(count(&t) == 3);
 };
 
-@test fn tap() void = {
+@test fn truncate() void = {
 	let t = new(3, true);
 	for (let bpm .. [80.0f32, 70.0, 60.0]) {
 		ringbuf::push(&t.buffer, bpm);
@@ -114,7 +114,7 @@ fn tostr(t: *const tapper) str = {
 	assert(eps_eq_buf(&t.buffer, [60.0, 50.0, 40.0]));
 };
 
-@test fn tap() void = {
+@test fn resize() void = {
 	let t = new(3, true);
 	for (let bpm .. [80.0f32, 70.0, 60.0]) {
 		ringbuf::push(&t.buffer, bpm);
