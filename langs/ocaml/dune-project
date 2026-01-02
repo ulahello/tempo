@@ -4,23 +4,14 @@
 
 (generate_opam_files true)
 
-(source
- (github username/reponame))
+(authors "Ula Shipman <ula.hello@mailbox.org>")
 
-(authors "Author Name <author@example.com>")
-
-(maintainers "Maintainer Name <maintainer@example.com>")
-
-(license LICENSE)
-
-(documentation https://url/to/documentation)
+(license MPL-2.0)
 
 (package
  (name tempo)
- (synopsis "A short synopsis")
- (description "A longer description")
- (depends ocaml (alcotest :with-test))
- (tags
-  ("add topics" "to describe" your project)))
+ (version 0.1.0)
+ (description "terminal tempo tapper")
+ (depends ocaml (alcotest :with-test)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
