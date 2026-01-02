@@ -66,7 +66,7 @@ let print_prompt (t : Tempo.Tap.t) =
   Printf.printf "%d/%d%s samples in buffer\n" (Tempo.Tap.count t)
     (Tempo.Tap.capacity t)
     (if Tempo.Tap.is_bounded t then "" else "+");
-  Printf.printf "%s BPM \n" (Tempo.Tap.string_of_sample (Tempo.Tap.bpm t));
+  Printf.printf "%s BPM\n" (Tempo.Tap.string_of_sample (Tempo.Tap.bpm t));
   ()
 
 let print_help =
