@@ -49,6 +49,7 @@ See [`/langs`](./langs) for each variant, and check their respective `INSTALL.md
 
 - [Ada](./langs/ada)
 - [Hare](./langs/hare)
+- [Haskell](./langs/haskell)
 - [OCaml](./langs/ocaml)
 - [Rust](./langs/rust)
 - [Zig](./langs/zig)
