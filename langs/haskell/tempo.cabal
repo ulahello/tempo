@@ -119,5 +119,6 @@ test-suite tempo-test
 
     -- Test dependencies.
     build-depends:
+        HUnit ^>=1.6.2.0,
         base ^>=4.20.2.0,
         tempo
