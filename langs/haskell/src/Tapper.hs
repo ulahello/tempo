@@ -1,3 +1,4 @@
+-- TODO: list exports
 module Tapper where
 
 import Data.Ord
@@ -8,6 +9,7 @@ import Text.Printf
 maxCapacity :: Int
 maxCapacity = 0x1000
 
+-- TODO: having to construct samples is annoying --- make it an alias?
 newtype Sample = Sample Float
 
 data Tapper = Tapper
