@@ -8,6 +8,7 @@ import Control.Monad (guard, when)
 import Data.Char
 import Data.Foldable
 import Data.Maybe
+import Data.Ord
 import System.IO
 import System.IO.Error (isEOFError)
 import Tapper
@@ -143,16 +144,25 @@ interactiveResize t = do
   putStrLn ""
   input <- getLine' " new buffer size? "
   let input' = fromMaybe "" input
-  parsedCap <- case (input', readMaybe input' :: Maybe Int) of
+  parsedCap <- case (input', readMaybe input' :: Maybe Integer) of
     ("", _) ->
       return Nothing
     (_, Just n) ->
       return (Just n)
     (_, Nothing) -> do
-      -- TODO: not sure if it overflowed??
       putStrLn " invalid integer"
       return Nothing
-  maybe (return t) (handleResize t) parsedCap
+  let clampedCap = fmap saturate parsedCap
+  maybe (return t) (handleResize t) clampedCap
+  where
+    saturate :: Integer -> Int
+    saturate =
+      fromIntegral
+        . clamp
+          -- surely there is a better way to express this?
+          ( (fromIntegral (minBound :: Int)) :: Integer,
+            (fromIntegral (maxBound :: Int)) :: Integer
+          )
 
 handleCommand :: Tapper -> Command -> IO (Maybe Tapper)
 handleCommand t c = case c of
