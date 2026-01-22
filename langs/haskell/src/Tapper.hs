@@ -1,5 +1,19 @@
--- TODO: list exports
-module Tapper where
+module Tapper
+  ( Sample (Sample),
+    Tapper,
+    create,
+    capacity,
+    count,
+    isRecording,
+    isBounded,
+    toggleBounded,
+    clear,
+    resize,
+    pushBpm,
+    tap,
+    bpm,
+  )
+where
 
 import Data.Ord
 import Data.Time.Clock
@@ -10,6 +24,7 @@ maxCapacity :: Int
 maxCapacity = 0x1000
 
 -- TODO: having to construct samples is annoying --- make it an alias?
+-- but we want custom Show
 newtype Sample = Sample Float
 
 data Tapper = Tapper
