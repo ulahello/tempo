@@ -1,5 +1,17 @@
--- TODO: list exports
-module Queue where
+module Queue
+  ( Queue,
+    create,
+    capacity,
+    isEmpty,
+    isFull,
+    tryPush,
+    pop,
+    push,
+    clear,
+    qReverse,
+    truncateBack,
+  )
+where
 
 import Data.Foldable
 import Data.List
