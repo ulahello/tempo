@@ -50,7 +50,7 @@ syncCap t =
       t' = t {capacity = capacity'}
    in if isBounded t'
         then
-          t' {samples = Q.truncateBack (samples t') (capacity t')}
+          t' {samples = Q.truncateBack (capacity t') (samples t')}
         else
           t'
 
@@ -64,11 +64,11 @@ clear t =
       prevTap = Nothing
     }
 
-resize :: Tapper -> Int -> Tapper
-resize t n = syncCap (t {capacity = n})
+resize :: Int -> Tapper -> Tapper
+resize n t = syncCap (t {capacity = n})
 
-pushBpm :: Tapper -> Sample -> Tapper
-pushBpm t s = syncCap (t {samples = Q.push (samples t) s})
+pushBpm :: Sample -> Tapper -> Tapper
+pushBpm s t = syncCap (t {samples = Q.push s (samples t)})
 
 tap :: Tapper -> IO Tapper
 tap t = do
@@ -81,7 +81,7 @@ tap t = do
               let elapsed = diffUTCTime now prev
                   elapsedSecs = realToFrac (nominalDiffTimeToSeconds elapsed)
                   s = Sample (60.0 / elapsedSecs)
-               in pushBpm t s
+               in pushBpm s t
             else
               t
   return t' {prevTap = Just now}

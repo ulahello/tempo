@@ -130,7 +130,7 @@ getLine' p = do
 
 handleResize :: Tapper -> Int -> IO Tapper
 handleResize t cap = do
-  let t' = Tapper.resize t cap
+  let t' = Tapper.resize cap t
   let reported = Tapper.capacity t'
   when (reported /= cap) $
     printf
