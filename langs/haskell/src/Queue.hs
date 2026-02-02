@@ -36,8 +36,8 @@ rebalance :: Queue a -> Queue a
 rebalance (Queue [] b n) = Queue (reverse b) [] n
 rebalance q = q
 
-tryPush :: Queue a -> a -> Maybe (Queue a)
-tryPush q x =
+tryPush :: a -> Queue a -> Maybe (Queue a)
+tryPush x q =
   if isFull q
     then Nothing
     else Just q {back = x : back q}
@@ -47,10 +47,10 @@ pop q@(Queue [] [] _) = (Nothing, q)
 pop q@(Queue [] _ _) = pop (rebalance q)
 pop q@(Queue (x : xs) _ _) = (Just x, q {front = xs})
 
-push :: Queue a -> a -> Queue a
-push q x =
+push :: a -> Queue a -> Queue a
+push x q =
   let q' = if isFull q then snd (pop q) else q
-   in fromJust (tryPush q' x)
+   in fromJust (tryPush x q')
 
 clear :: Queue a -> Queue a
 clear q = create (capacity q)
@@ -58,13 +58,13 @@ clear q = create (capacity q)
 qReverse :: Queue a -> Queue a
 qReverse (Queue f b n) = Queue b f n
 
-truncateBack :: Queue a -> Int -> Queue a
-truncateBack q newLen =
+truncateBack :: Int -> Queue a -> Queue a
+truncateBack newLen q =
   if length q <= newLen
     then q
     else
       let (_, q') = pop q
-       in truncateBack q' newLen
+       in truncateBack newLen q'
 
 instance Foldable Queue where
   foldr f z q =

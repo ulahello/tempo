@@ -32,12 +32,10 @@ makeQueueTest = TestCase . flip evalStateT (Queue.create 0)
 makeTapperTest :: StateT Tapper IO () -> Test
 makeTapperTest = TestCase . flip evalStateT (Tapper.create 0 True)
 
--- TODO: consider flipping arguments for Queue.push and friends, Tapper.pushBpm
-
 pushPop :: StateT (Queue Int) IO ()
 pushPop = do
   put (Queue.create 8)
-  modify (\q -> foldl Queue.push q (range (Queue.capacity q)))
+  modify (\q -> foldl (flip Queue.push) q (range (Queue.capacity q)))
   gets toList >>= lift . assertEqual "push works" [1, 2, 3, 4, 5, 6, 7, 8]
   gets Queue.isFull >>= lift . assertBool "full"
   state Queue.pop >>= lift . assertEqual "1st pop" (Just 1)
@@ -48,9 +46,9 @@ pushPop = do
 pushClobber :: StateT (Queue Int) IO ()
 pushClobber = do
   put (Queue.create 8)
-  modify (\q -> foldl Queue.push q (range (Queue.capacity q)))
+  modify (\q -> foldl (flip Queue.push) q (range (Queue.capacity q)))
   gets toList >>= lift . assertEqual "push works" [1, 2, 3, 4, 5, 6, 7, 8]
-  modify (flip Queue.push 24)
+  modify (Queue.push 24)
   gets toList >>= lift . assertEqual "push clobbers oldest element when full" [2, 3, 4, 5, 6, 7, 8, 24]
 
 clear :: StateT (Queue Int) IO ()
@@ -64,32 +62,31 @@ clear = do
   where
     pushThreePopOne :: Queue Int -> Int -> Queue Int
     pushThreePopOne q i =
-      let push' = flip Queue.push
-          (_, q') =
+      let (_, q') =
             Queue.pop
-              . push' (i * 3)
-              . push' (i * 2)
-              . push' (i * 1)
+              . Queue.push (i * 3)
+              . Queue.push (i * 2)
+              . Queue.push (i * 1)
               $ q
        in q'
 
 truncateBack :: StateT (Queue Int) IO ()
 truncateBack = do
   put (Queue.create 8)
-  modify (\q -> foldl Queue.push q (range (Queue.capacity q)))
-  modify (flip Queue.truncateBack 3)
+  modify (\q -> foldl (flip Queue.push) q (range (Queue.capacity q)))
+  modify (Queue.truncateBack 3)
   gets toList >>= lift . assertEqual "truncated down to 3" [6, 7, 8]
-  modify (flip Queue.truncateBack 100)
+  modify (Queue.truncateBack 100)
   gets toList >>= lift . assertEqual "truncate up is nop" [6, 7, 8]
 
 display :: StateT Tapper IO ()
 display = do
   put (Tapper.create 10 True)
-  modify (\t -> foldl Tapper.pushBpm t (map Sample [120.051, 112.41, 121.105]))
+  modify (\t -> foldl (flip Tapper.pushBpm) t (map Sample [120.051, 112.41, 121.105]))
   gets show >>= lift . assertEqual "to string works" "[121.1, 112.4, 120.1]"
   modify Tapper.clear
   gets show >>= lift . assertEqual "empty to string" "[]"
-  modify (flip Tapper.pushBpm (Sample 112.76))
+  modify (Tapper.pushBpm (Sample 112.76))
   gets show >>= lift . assertEqual "to string with one element works" "[112.8]"
 
 isRecording :: StateT Tapper IO ()
@@ -107,13 +104,13 @@ bpm :: StateT Tapper IO ()
 bpm = do
   put (Tapper.create 10 True)
   gets (approxEqual 0.0 . Tapper.bpm) >>= lift . assertBool "starts at 0.0 BPM"
-  modify (flip Tapper.pushBpm (Sample 23.0))
+  modify (Tapper.pushBpm (Sample 23.0))
   gets (approxEqual 23.0 . Tapper.bpm) >>= lift . assertBool "1st tap"
-  modify (flip Tapper.pushBpm (Sample 26.0))
+  modify (Tapper.pushBpm (Sample 26.0))
   gets (approxEqual 24.5 . Tapper.bpm) >>= lift . assertBool "2nd tap"
-  modify (flip Tapper.pushBpm (Sample 29.0))
+  modify (Tapper.pushBpm (Sample 29.0))
   gets (approxEqual 26.0 . Tapper.bpm) >>= lift . assertBool "3rd tap"
-  modify (flip Tapper.pushBpm (Sample 61.0))
+  modify (Tapper.pushBpm (Sample 61.0))
   gets (approxEqual 34.75 . Tapper.bpm) >>= lift . assertBool "4th tap"
 
 tap :: StateT Tapper IO ()
@@ -143,14 +140,14 @@ tap = do
 tapperTruncate :: StateT Tapper IO ()
 tapperTruncate = do
   put (Tapper.create 3 True)
-  modify (\t -> foldl Tapper.pushBpm t (map Sample [80.0, 70.0, 60.0]))
+  modify (\t -> foldl (flip Tapper.pushBpm) t (map Sample [80.0, 70.0, 60.0]))
   gets show >>= lift . assertEqual "initialized" "[60.0, 70.0, 80.0]"
 
-  modify (flip Tapper.pushBpm (Sample 50.0))
+  modify (Tapper.pushBpm (Sample 50.0))
   gets show >>= lift . assertEqual "push evicts oldest sample" "[50.0, 60.0, 70.0]"
 
   modify Tapper.toggleBounded
-  modify (flip Tapper.pushBpm (Sample 40.0))
+  modify (Tapper.pushBpm (Sample 40.0))
   gets show >>= lift . assertEqual "nothing evicted from unbounded buffer" "[40.0, 50.0, 60.0, 70.0]"
 
   modify Tapper.toggleBounded
@@ -159,10 +156,10 @@ tapperTruncate = do
 resize :: StateT Tapper IO ()
 resize = do
   put (Tapper.create 3 True)
-  modify (\t -> foldl Tapper.pushBpm t (map Sample [80.0, 70.0, 60.0]))
+  modify (\t -> foldl (flip Tapper.pushBpm) t (map Sample [80.0, 70.0, 60.0]))
   gets show >>= lift . assertEqual "initialized" "[60.0, 70.0, 80.0]"
 
-  modify (flip Tapper.resize 2)
+  modify (Tapper.resize 2)
   gets show >>= lift . assertEqual "after resize, oldest evicted" "[60.0, 70.0]"
   gets Tapper.capacity >>= lift . assertEqual "capacity is smaller now" 2
 
