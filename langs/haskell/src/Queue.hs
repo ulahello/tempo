@@ -42,14 +42,14 @@ tryPush q x =
     then Nothing
     else Just q {back = x : back q}
 
-pop :: Queue a -> (Queue a, Maybe a)
-pop q@(Queue [] [] _) = (q, Nothing)
+pop :: Queue a -> (Maybe a, Queue a)
+pop q@(Queue [] [] _) = (Nothing, q)
 pop q@(Queue [] _ _) = pop (rebalance q)
-pop q@(Queue (x : xs) _ _) = (q {front = xs}, Just x)
+pop q@(Queue (x : xs) _ _) = (Just x, q {front = xs})
 
 push :: Queue a -> a -> Queue a
 push q x =
-  let q' = if isFull q then fst (pop q) else q
+  let q' = if isFull q then snd (pop q) else q
    in fromJust (tryPush q' x)
 
 clear :: Queue a -> Queue a
@@ -62,7 +62,9 @@ truncateBack :: Queue a -> Int -> Queue a
 truncateBack q newLen =
   if length q <= newLen
     then q
-    else truncateBack (fst (pop q)) newLen
+    else
+      let (_, q') = pop q
+       in truncateBack q' newLen
 
 instance Foldable Queue where
   foldr f z q =

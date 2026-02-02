@@ -1,9 +1,11 @@
 module Main (main) where
 
+import Control.Monad.State.Lazy
 import Data.Foldable
+import Queue (Queue)
 import qualified Queue
-import qualified Tapper
 import Tapper (Sample (Sample), Tapper)
+import qualified Tapper
 import Test.HUnit
 
 revrange :: Int -> [Int]
@@ -24,67 +26,46 @@ eps = 0.001
 approxEqual :: Float -> Sample -> Bool
 approxEqual = epsEqual eps
 
--- TODO: use state variable instead of this. it doesn't handle the pushPop test well
-runCaseList :: a -> [(a -> IO a, a -> IO ())] -> IO ()
-runCaseList _ [] = return ()
-runCaseList z ((modify, run) : rest) = do
-  z' <- modify z
-  run z'
-  runCaseList z' rest
+makeQueueTest :: StateT (Queue Int) IO () -> Test
+makeQueueTest = TestCase . flip evalStateT (Queue.create 0)
 
-testOfCaseList :: a -> [(a -> IO a, a -> IO ())] -> Test
-testOfCaseList z lst = TestCase (runCaseList z lst)
+makeTapperTest :: StateT Tapper IO () -> Test
+makeTapperTest = TestCase . flip evalStateT (Tapper.create 0 True)
 
-pushBpm' :: Float -> Tapper -> Tapper
-pushBpm' = flip Tapper.pushBpm . Sample
+-- TODO: consider flipping arguments for Queue.push and friends, Tapper.pushBpm
 
-pushPop :: Test
-pushPop =
-  TestCase
-    ( do
-        let q = Queue.create 8
-        let q' = foldl Queue.push q (range (Queue.capacity q))
-        assertEqual "push works" [1, 2, 3, 4, 5, 6, 7, 8] (toList q')
-        assertBool "full" (Queue.isFull q')
+pushPop :: StateT (Queue Int) IO ()
+pushPop = do
+  put (Queue.create 8)
+  modify (\q -> foldl Queue.push q (range (Queue.capacity q)))
+  gets toList >>= lift . assertEqual "push works" [1, 2, 3, 4, 5, 6, 7, 8]
+  gets Queue.isFull >>= lift . assertBool "full"
+  state Queue.pop >>= lift . assertEqual "1st pop" (Just 1)
+  state Queue.pop >>= lift . assertEqual "2nd pop" (Just 2)
+  state Queue.pop >>= lift . assertEqual "3rd pop" (Just 3)
+  gets toList >>= lift . assertEqual "pop works" [4, 5, 6, 7, 8]
 
-        let (q'', x) = Queue.pop q'
-        assertEqual "1st pop" (Just 1) x
+pushClobber :: StateT (Queue Int) IO ()
+pushClobber = do
+  put (Queue.create 8)
+  modify (\q -> foldl Queue.push q (range (Queue.capacity q)))
+  gets toList >>= lift . assertEqual "push works" [1, 2, 3, 4, 5, 6, 7, 8]
+  modify (flip Queue.push 24)
+  gets toList >>= lift . assertEqual "push clobbers oldest element when full" [2, 3, 4, 5, 6, 7, 8, 24]
 
-        let (q''', x') = Queue.pop q''
-        assertEqual "2nd pop" (Just 2) x'
-
-        let (q'''', x'') = Queue.pop q'''
-        assertEqual "3rd pop" (Just 3) x''
-
-        assertEqual "pop works" [4, 5, 6, 7, 8] (toList q'''')
-    )
-
-pushClobber :: Test
-pushClobber =
-  testOfCaseList
-    (Queue.create 8)
-    [ ( \q -> return (foldl Queue.push q (range (Queue.capacity q))),
-        assertEqual "push works" [1, 2, 3, 4, 5, 6, 7, 8] . toList
-      ),
-      ( return . flip Queue.push 24,
-        assertEqual "push clobbers oldest element when full" [2, 3, 4, 5, 6, 7, 8, 24] . toList
-      )
-    ]
-
-clear :: Test
-clear =
-  testOfCaseList
-    (Queue.create 8)
-    [ ( \q -> return (foldl pushThreePopOne q (range (Queue.capacity q))),
-        assertBool "not empty" . not . Queue.isEmpty
-      ),
-      (return . Queue.clear, assertBool "now is empty" . Queue.isEmpty),
-      (return, assertEqual "empty contents" [] . toList)
-    ]
+clear :: StateT (Queue Int) IO ()
+clear = do
+  put (Queue.create 8)
+  modify (\q -> foldl pushThreePopOne q (range (Queue.capacity q)))
+  gets (not . Queue.isEmpty) >>= lift . assertBool "not empty"
+  modify Queue.clear
+  gets Queue.isEmpty >>= lift . assertBool "now is empty"
+  gets toList >>= lift . assertEqual "empty contents" []
   where
+    pushThreePopOne :: Queue Int -> Int -> Queue Int
     pushThreePopOne q i =
       let push' = flip Queue.push
-          (q', _) =
+          (_, q') =
             Queue.pop
               . push' (i * 3)
               . push' (i * 2)
@@ -92,116 +73,122 @@ clear =
               $ q
        in q'
 
-truncateBack :: Test
-truncateBack =
-  testOfCaseList
-    (Queue.create 8)
-    [ ( \q -> return (foldl Queue.push q (range (Queue.capacity q))),
-        assertEqual "initialized" [1, 2, 3, 4, 5, 6, 7, 8] . toList
-      ),
-      (return . flip Queue.truncateBack 3, assertEqual "truncated down to 3" [6, 7, 8] . toList),
-      (return . flip Queue.truncateBack 100, assertEqual "truncate up is nop" [6, 7, 8] . toList)
-    ]
+truncateBack :: StateT (Queue Int) IO ()
+truncateBack = do
+  put (Queue.create 8)
+  modify (\q -> foldl Queue.push q (range (Queue.capacity q)))
+  modify (flip Queue.truncateBack 3)
+  gets toList >>= lift . assertEqual "truncated down to 3" [6, 7, 8]
+  modify (flip Queue.truncateBack 100)
+  gets toList >>= lift . assertEqual "truncate up is nop" [6, 7, 8]
 
-display :: Test
-display =
-  testOfCaseList
-    (Tapper.create 10 True)
-    [ ( \t -> return (foldl Tapper.pushBpm t (map Sample [120.051, 112.41, 121.105])),
-        assertEqual "to string works" "[121.1, 112.4, 120.1]" . show
-      ),
-      (return . Tapper.clear, assertEqual "empty to string" "[]" . show),
-      (return . pushBpm' 112.76, assertEqual "to string with one element works" "[112.8]" . show)
-    ]
+display :: StateT Tapper IO ()
+display = do
+  put (Tapper.create 10 True)
+  modify (\t -> foldl Tapper.pushBpm t (map Sample [120.051, 112.41, 121.105]))
+  gets show >>= lift . assertEqual "to string works" "[121.1, 112.4, 120.1]"
+  modify Tapper.clear
+  gets show >>= lift . assertEqual "empty to string" "[]"
+  modify (flip Tapper.pushBpm (Sample 112.76))
+  gets show >>= lift . assertEqual "to string with one element works" "[112.8]"
 
-isRecording :: Test
-isRecording =
-  testOfCaseList
-    (Tapper.create 10 True)
-    [ (return, assertBool "starts not recording" . not . Tapper.isRecording),
-      (Tapper.tap, assertBool "records first tap" . Tapper.isRecording),
-      (Tapper.tap, assertBool "keeps recording taps" . Tapper.isRecording),
-      (return . Tapper.clear, assertBool "stops once cleared" . not . Tapper.isRecording)
-    ]
+isRecording :: StateT Tapper IO ()
+isRecording = do
+  put (Tapper.create 10 True)
+  gets (not . Tapper.isRecording) >>= lift . assertBool "starts not recording"
+  get >>= lift . Tapper.tap >>= put
+  gets Tapper.isRecording >>= lift . assertBool "records first tap"
+  get >>= lift . Tapper.tap >>= put
+  gets Tapper.isRecording >>= lift . assertBool "keeps recording taps"
+  modify Tapper.clear
+  gets (not . Tapper.isRecording) >>= lift . assertBool "stops once cleared"
 
-bpm :: Test
-bpm =
-  testOfCaseList
-    (Tapper.create 10 True)
-    [ (return, assertBool "starts at 0.0 BPM" . approxEqual 0.0 . Tapper.bpm),
-      (return . pushBpm' 23.0, assertBool "1st tap" . approxEqual 23.0 . Tapper.bpm),
-      (return . pushBpm' 26.0, assertBool "2nd tap" . approxEqual 24.5 . Tapper.bpm),
-      (return . pushBpm' 29.0, assertBool "3rd tap" . approxEqual 26.0 . Tapper.bpm),
-      (return . pushBpm' 61.0, assertBool "4th tap" . approxEqual 34.75 . Tapper.bpm)
-    ]
+bpm :: StateT Tapper IO ()
+bpm = do
+  put (Tapper.create 10 True)
+  gets (approxEqual 0.0 . Tapper.bpm) >>= lift . assertBool "starts at 0.0 BPM"
+  modify (flip Tapper.pushBpm (Sample 23.0))
+  gets (approxEqual 23.0 . Tapper.bpm) >>= lift . assertBool "1st tap"
+  modify (flip Tapper.pushBpm (Sample 26.0))
+  gets (approxEqual 24.5 . Tapper.bpm) >>= lift . assertBool "2nd tap"
+  modify (flip Tapper.pushBpm (Sample 29.0))
+  gets (approxEqual 26.0 . Tapper.bpm) >>= lift . assertBool "3rd tap"
+  modify (flip Tapper.pushBpm (Sample 61.0))
+  gets (approxEqual 34.75 . Tapper.bpm) >>= lift . assertBool "4th tap"
 
-tap :: Test
-tap =
-  testOfCaseList
-    (Tapper.create 3 True)
-    [ (return, assertEqual "starts empty" 0 . Tapper.count),
-      (Tapper.tap, assertEqual "1st tap, no span yet" 0 . Tapper.count),
-      (Tapper.tap, assertEqual "2nd tap" 1 . Tapper.count),
-      (Tapper.tap, assertEqual "3rd tap" 2 . Tapper.count),
-      (Tapper.tap, assertEqual "4th tap" 3 . Tapper.count),
-      (Tapper.tap, assertEqual "5th tap, oldest dropped" 3 . Tapper.count),
-      (Tapper.tap . Tapper.toggleBounded, assertEqual "1st tap after unbounding, can hold more" 4 . Tapper.count),
-      (Tapper.tap, assertEqual "2nd tap after unbounding" 5 . Tapper.count),
-      (return . Tapper.toggleBounded, assertBool "is now bounded" . Tapper.isBounded),
-      (return, assertEqual "truncated after bounding" 3 . Tapper.count)
-    ]
+tap :: StateT Tapper IO ()
+tap = do
+  put (Tapper.create 3 True)
+  gets Tapper.count >>= lift . assertEqual "starts empty" 0
+  get >>= lift . Tapper.tap >>= put
+  gets Tapper.count >>= lift . assertEqual "1st tap, no span yet" 0
+  get >>= lift . Tapper.tap >>= put
+  gets Tapper.count >>= lift . assertEqual "2nd tap" 1
+  get >>= lift . Tapper.tap >>= put
+  gets Tapper.count >>= lift . assertEqual "3rd tap" 2
+  get >>= lift . Tapper.tap >>= put
+  gets Tapper.count >>= lift . assertEqual "4th tap" 3
+  get >>= lift . Tapper.tap >>= put
+  gets Tapper.count >>= lift . assertEqual "5th, oldest dropped" 3
 
-tapperTruncate :: Test
-tapperTruncate =
-  testOfCaseList
-    (Tapper.create 3 True)
-    [ ( \t -> return (foldl Tapper.pushBpm t (map Sample [80.0, 70.0, 60.0])),
-        assertEqual "initialized" "[60.0, 70.0, 80.0]" . show
-      ),
-      ( return . pushBpm' 50.0,
-        assertEqual "push evicts oldest sample" "[50.0, 60.0, 70.0]" . show
-      ),
-      ( return . pushBpm' 40.0,
-        assertEqual "nothing evicted from unbounded buffer" "[40.0, 50.0, 60.0, 70.0]" . show
-      ),
-      ( return . Tapper.toggleBounded,
-        assertEqual "after bounding, oldest evicted" "[40.0, 50.0, 60.0]" . show
-      )
-    ]
+  modify Tapper.toggleBounded
+  get >>= lift . Tapper.tap >>= put
+  gets Tapper.count >>= lift . assertEqual "1st tap after unbounding, can hold more" 4
+  get >>= lift . Tapper.tap >>= put
+  gets Tapper.count >>= lift . assertEqual "2nd tap after unbounding" 5
+  modify Tapper.toggleBounded
+  gets Tapper.isBounded >>= lift . assertBool "is now bounded"
+  gets Tapper.count >>= lift . assertEqual "truncated after bounding" 3
 
-resize :: Test
-resize =
-  -- TODO: awful
-  testOfCaseList
-    (Tapper.create 3 True)
-    [ ( \t -> return (foldl Tapper.pushBpm t (map Sample [80.0, 70.0, 60.0])),
-        assertEqual "initialized" "[60.0, 70.0, 80.0]" . show
-      ),
-      ( return . flip Tapper.resize 2,
-        assertEqual "after resize, oldest evicted" "[60.0, 70.0]" . show
-      ),
-      (return, assertEqual "capacity is smaller now" 2 . Tapper.capacity)
-    ]
+tapperTruncate :: StateT Tapper IO ()
+tapperTruncate = do
+  put (Tapper.create 3 True)
+  modify (\t -> foldl Tapper.pushBpm t (map Sample [80.0, 70.0, 60.0]))
+  gets show >>= lift . assertEqual "initialized" "[60.0, 70.0, 80.0]"
+
+  modify (flip Tapper.pushBpm (Sample 50.0))
+  gets show >>= lift . assertEqual "push evicts oldest sample" "[50.0, 60.0, 70.0]"
+
+  modify Tapper.toggleBounded
+  modify (flip Tapper.pushBpm (Sample 40.0))
+  gets show >>= lift . assertEqual "nothing evicted from unbounded buffer" "[40.0, 50.0, 60.0, 70.0]"
+
+  modify Tapper.toggleBounded
+  gets show >>= lift . assertEqual "after bounding, oldest evicted" "[40.0, 50.0, 60.0]"
+
+resize :: StateT Tapper IO ()
+resize = do
+  put (Tapper.create 3 True)
+  modify (\t -> foldl Tapper.pushBpm t (map Sample [80.0, 70.0, 60.0]))
+  gets show >>= lift . assertEqual "initialized" "[60.0, 70.0, 80.0]"
+
+  modify (flip Tapper.resize 2)
+  gets show >>= lift . assertEqual "after resize, oldest evicted" "[60.0, 70.0]"
+  gets Tapper.capacity >>= lift . assertEqual "capacity is smaller now" 2
 
 queueTests :: Test
 queueTests =
-  TestList
-    [ TestLabel "push pop" pushPop,
-      TestLabel "push clobber" pushClobber,
-      TestLabel "clear" clear,
-      TestLabel "truncate back" truncateBack
-    ]
+  TestList $
+    map
+      (\(l, s) -> TestLabel l (makeQueueTest s))
+      [ ("push pop", pushPop),
+        ("push clobber", pushClobber),
+        ("clear", clear),
+        ("truncate back", truncateBack)
+      ]
 
 tapperTests :: Test
 tapperTests =
-  TestList
-    [ TestLabel "display" display,
-      TestLabel "is recording" isRecording,
-      TestLabel "bpm" bpm,
-      TestLabel "tap" tap,
-      TestLabel "truncate" tapperTruncate,
-      TestLabel "resize" resize
-    ]
+  TestList $
+    map
+      (\(l, s) -> TestLabel l (makeTapperTest s))
+      [ ("display", display),
+        ("is recording", isRecording),
+        ("bpm", bpm),
+        ("tap", tap),
+        ("truncate", tapperTruncate),
+        ("resize", resize)
+      ]
 
 tests :: Test
 tests = TestList [TestLabel "Queue" queueTests, TestLabel "Tapper" tapperTests]
