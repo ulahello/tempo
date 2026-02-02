@@ -26,6 +26,12 @@ eps = 0.001
 approxEqual :: Float -> Sample -> Bool
 approxEqual = epsEqual eps
 
+pushBpms :: [Float] -> Tapper -> Tapper
+pushBpms xs t = foldl (flip Tapper.pushBpm) t (map Sample xs)
+
+pushMany :: [a] -> Queue a -> Queue a
+pushMany = flip (foldl (flip Queue.push))
+
 makeQueueTest :: StateT (Queue Int) IO () -> Test
 makeQueueTest = TestCase . flip evalStateT (Queue.create 0)
 
@@ -35,7 +41,7 @@ makeTapperTest = TestCase . flip evalStateT (Tapper.create 0 True)
 pushPop :: StateT (Queue Int) IO ()
 pushPop = do
   put (Queue.create 8)
-  modify (\q -> foldl (flip Queue.push) q (range (Queue.capacity q)))
+  modify (pushMany (range 8))
   gets toList >>= lift . assertEqual "push works" [1, 2, 3, 4, 5, 6, 7, 8]
   gets Queue.isFull >>= lift . assertBool "full"
   state Queue.pop >>= lift . assertEqual "1st pop" (Just 1)
@@ -46,7 +52,7 @@ pushPop = do
 pushClobber :: StateT (Queue Int) IO ()
 pushClobber = do
   put (Queue.create 8)
-  modify (\q -> foldl (flip Queue.push) q (range (Queue.capacity q)))
+  modify (pushMany (range 8))
   gets toList >>= lift . assertEqual "push works" [1, 2, 3, 4, 5, 6, 7, 8]
   modify (Queue.push 24)
   gets toList >>= lift . assertEqual "push clobbers oldest element when full" [2, 3, 4, 5, 6, 7, 8, 24]
@@ -54,7 +60,7 @@ pushClobber = do
 clear :: StateT (Queue Int) IO ()
 clear = do
   put (Queue.create 8)
-  modify (\q -> foldl pushThreePopOne q (range (Queue.capacity q)))
+  modify (\q -> foldl pushThreePopOne q (range 8))
   gets (not . Queue.isEmpty) >>= lift . assertBool "not empty"
   modify Queue.clear
   gets Queue.isEmpty >>= lift . assertBool "now is empty"
@@ -73,7 +79,7 @@ clear = do
 truncateBack :: StateT (Queue Int) IO ()
 truncateBack = do
   put (Queue.create 8)
-  modify (\q -> foldl (flip Queue.push) q (range (Queue.capacity q)))
+  modify (\q -> foldl (flip Queue.push) q (range 8))
   modify (Queue.truncateBack 3)
   gets toList >>= lift . assertEqual "truncated down to 3" [6, 7, 8]
   modify (Queue.truncateBack 100)
@@ -82,7 +88,7 @@ truncateBack = do
 display :: StateT Tapper IO ()
 display = do
   put (Tapper.create 10 True)
-  modify (\t -> foldl (flip Tapper.pushBpm) t (map Sample [120.051, 112.41, 121.105]))
+  modify (pushBpms [120.051, 112.41, 121.105])
   gets show >>= lift . assertEqual "to string works" "[121.1, 112.4, 120.1]"
   modify Tapper.clear
   gets show >>= lift . assertEqual "empty to string" "[]"
@@ -140,7 +146,7 @@ tap = do
 tapperTruncate :: StateT Tapper IO ()
 tapperTruncate = do
   put (Tapper.create 3 True)
-  modify (\t -> foldl (flip Tapper.pushBpm) t (map Sample [80.0, 70.0, 60.0]))
+  modify (pushBpms [80.0, 70.0, 60.0])
   gets show >>= lift . assertEqual "initialized" "[60.0, 70.0, 80.0]"
 
   modify (Tapper.pushBpm (Sample 50.0))
@@ -156,7 +162,7 @@ tapperTruncate = do
 resize :: StateT Tapper IO ()
 resize = do
   put (Tapper.create 3 True)
-  modify (\t -> foldl (flip Tapper.pushBpm) t (map Sample [80.0, 70.0, 60.0]))
+  modify (pushBpms [80.0, 70.0, 60.0])
   gets show >>= lift . assertEqual "initialized" "[60.0, 70.0, 80.0]"
 
   modify (Tapper.resize 2)
