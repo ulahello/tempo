@@ -32,11 +32,12 @@ pushBpms xs t = foldl (flip Tapper.pushBpm) t (map Sample xs)
 pushMany :: [a] -> Queue a -> Queue a
 pushMany = flip (foldl (flip Queue.push))
 
-makeQueueTest :: StateT (Queue Int) IO () -> Test
-makeQueueTest = TestCase . flip evalStateT (Queue.create 0)
+makeStateTest :: s -> StateT s IO () -> Test
+makeStateTest z = TestCase . flip evalStateT z
 
-makeTapperTest :: StateT Tapper IO () -> Test
-makeTapperTest = TestCase . flip evalStateT (Tapper.create 0 True)
+makeStateTestList :: s -> [(String, StateT s IO ())] -> Test
+makeStateTestList z =
+  TestList . map (\(l, s) -> TestLabel l (makeStateTest z s))
 
 pushPop :: StateT (Queue Int) IO ()
 pushPop = do
@@ -171,27 +172,25 @@ resize = do
 
 queueTests :: Test
 queueTests =
-  TestList $
-    map
-      (\(l, s) -> TestLabel l (makeQueueTest s))
-      [ ("push pop", pushPop),
-        ("push clobber", pushClobber),
-        ("clear", clear),
-        ("truncate back", truncateBack)
-      ]
+  makeStateTestList
+    (Queue.create 0)
+    [ ("push pop", pushPop),
+      ("push clobber", pushClobber),
+      ("clear", clear),
+      ("truncate back", truncateBack)
+    ]
 
 tapperTests :: Test
 tapperTests =
-  TestList $
-    map
-      (\(l, s) -> TestLabel l (makeTapperTest s))
-      [ ("display", display),
-        ("is recording", isRecording),
-        ("bpm", bpm),
-        ("tap", tap),
-        ("truncate", tapperTruncate),
-        ("resize", resize)
-      ]
+  makeStateTestList
+    (Tapper.create 0 True)
+    [ ("display", display),
+      ("is recording", isRecording),
+      ("bpm", bpm),
+      ("tap", tap),
+      ("truncate", tapperTruncate),
+      ("resize", resize)
+    ]
 
 tests :: Test
 tests = TestList [TestLabel "Queue" queueTests, TestLabel "Tapper" tapperTests]
