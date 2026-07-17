@@ -8,17 +8,14 @@ export type buffer = struct {
 	end: u16,
 };
 
-export fn new(capacity: u16) buffer = {
+export fn new(capacity: u16, storage: []f32) buffer = {
+	assert(capacity <= len(storage), "storage must fit capacity");
 	assert(math::popcount(capacity) == 1, "ringbuf capacity must be power of two");
 	return buffer {
-		items = alloc([math::NAN...], capacity),
+		items = storage,
 		start = 0,
 		end = 0,
 	};
-};
-
-export fn buffer_free(buf: *buffer) void = {
-	free(buf.items);
 };
 
 export fn length(buf: *const buffer) u16 = buf.end - buf.start;

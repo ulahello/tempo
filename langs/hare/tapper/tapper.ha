@@ -7,7 +7,7 @@ use time;
 
 def CLOCK = time::clock::MONOTONIC;
 def BPM_PRECISION: uint = 1;
-def MAX_CAPACITY: u16 = 0x1000;
+export def MAX_CAPACITY: u16 = 0x1000;
 
 export type tapper = struct {
 	buffer: ringbuf::buffer,
@@ -16,17 +16,14 @@ export type tapper = struct {
 	prev_tap: (time::instant | void),
 };
 
-export fn new(capacity: u16, bounded: bool) tapper = {
+export fn new(capacity: u16, bounded: bool, storage: []f32) tapper = {
+	assert(len(storage) == MAX_CAPACITY, "storage must fit MAX_CAPACITY");
 	return tapper {
-		buffer = ringbuf::new(MAX_CAPACITY),
+		buffer = ringbuf::new(MAX_CAPACITY, storage),
 		capacity = capacity,
 		bounded = bounded,
 		prev_tap = void,
 	};
-};
-
-export fn tapper_free(self: *tapper) void = {
-	ringbuf::buffer_free(&self.buffer);
 };
 
 export fn tap(self: *tapper) void = {

@@ -3,6 +3,7 @@ use bufio;
 use encoding::utf8;
 use fmt;
 use io;
+use math;
 use os;
 use ringbuf;
 use strconv;
@@ -166,8 +167,8 @@ fn interactive_resize(tapper: *const tapper::tapper) (void | io::error) = {
 };
 
 fn repl() (void | encoding::utf8::invalid | io::error) = {
-	let tapper = tapper::new(DEFAULT_CAPACITY, DEFAULT_BOUNDED);
-	defer tapper::tapper_free(&tapper);
+	let storage: [tapper::MAX_CAPACITY]f32 = [math::NAN...];
+	let tapper = tapper::new(DEFAULT_CAPACITY, DEFAULT_BOUNDED, &storage);
 
 	// Print splash text
 	print_splash()?;

@@ -21,6 +21,11 @@ fn eps_eq_buf(lhs: const *ringbuf::buffer, rhs: []const f32) bool = {
 	return true;
 };
 
+fn new_alloc(capacity: u16, bounded: bool) tapper = {
+	let storage: []f32 = alloc([math::NAN...], MAX_CAPACITY)!;
+	return new(capacity, bounded, storage);
+};
+
 fn tostr(t: *const tapper) str = {
 	static let buf: [1024]u8 = [0...];
 	let h = memio::fixed(&buf);
@@ -29,7 +34,7 @@ fn tostr(t: *const tapper) str = {
 };
 
 @test fn display() void = {
-	let t = new(10, true);
+	let t = new_alloc(10, true);
 	for (let bpm .. [120.05f32, 112.41, 121.105]) {
 		ringbuf::push(&t.buffer, bpm);
 	};
@@ -44,7 +49,7 @@ fn tostr(t: *const tapper) str = {
 };
 
 @test fn is_recording() void = {
-	let t = new(10, true);
+	let t = new_alloc(10, true);
 	assert(!is_recording(&t));
 	tap(&t);
 	assert(is_recording(&t));
@@ -55,7 +60,7 @@ fn tostr(t: *const tapper) str = {
 };
 
 @test fn bpm() void = {
-	let t = new(10, true);
+	let t = new_alloc(10, true);
 	assert(eps_eq(0.0, bpm(&t)));
 	for (let (elem, new_avg) .. [
 		(23.0f32, 23.0f32),
@@ -68,7 +73,7 @@ fn tostr(t: *const tapper) str = {
 };
 
 @test fn tap() void = {
-	let t = new(3, true);
+	let t = new_alloc(3, true);
 	assert(count(&t) == 0);
 	tap(&t);
 	assert(count(&t) == 0);
@@ -90,7 +95,7 @@ fn tostr(t: *const tapper) str = {
 };
 
 @test fn truncate() void = {
-	let t = new(3, true);
+	let t = new_alloc(3, true);
 	for (let bpm .. [80.0f32, 70.0, 60.0]) {
 		ringbuf::push(&t.buffer, bpm);
 	};
@@ -114,7 +119,7 @@ fn tostr(t: *const tapper) str = {
 };
 
 @test fn resize() void = {
-	let t = new(3, true);
+	let t = new_alloc(3, true);
 	for (let bpm .. [80.0f32, 70.0, 60.0]) {
 		ringbuf::push(&t.buffer, bpm);
 	};

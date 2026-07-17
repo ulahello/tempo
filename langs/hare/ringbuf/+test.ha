@@ -1,4 +1,10 @@
+use math;
 use types;
+
+fn new_alloc(capacity: u16) buffer = {
+	let storage: []f32 = alloc([math::NAN...], capacity)!;
+	return new(capacity, storage);
+};
 
 fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 	if (length(lhs) != len(rhs)) {
@@ -13,7 +19,7 @@ fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 };
 
 @test fn push_pop() void = {
-	let buf = new(8);
+	let buf = new_alloc(8);
 	for (let i: u16 = 0; i < capacity(&buf); i += 1) {
 		push(&buf, i: f32);
 	};
@@ -27,7 +33,7 @@ fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 };
 
 @test fn push_clobber() void = {
-	let buf = new(8);
+	let buf = new_alloc(8);
 	for (let i: u16 = 0; i < capacity(&buf); i += 1) {
 		push(&buf, i: f32);
 	};
@@ -38,7 +44,7 @@ fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 };
 
 @test fn overflow() void = {
-	let buf = new(8);
+	let buf = new_alloc(8);
 	for (let i: u16 = 0; i < types::U16_MAX; i += 1) {
 		push(&buf, 4.0);
 		push(&buf, 9.0);
@@ -52,7 +58,7 @@ fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 };
 
 @test fn clear() void = {
-	let buf = new(8);
+	let buf = new_alloc(8);
 	for (let i: u16 = 0; i < 100; i += 1) {
 		push(&buf, i: f32 * 1.0);
 		push(&buf, i: f32 * 2.0);
@@ -65,7 +71,7 @@ fn eq_slice(lhs: *const buffer, rhs: []const f32) bool = {
 };
 
 @test fn truncate_back() void = {
-	let buf = new(8);
+	let buf = new_alloc(8);
 	for (let i: u16 = 0; i < capacity(&buf); i += 1) {
 		push(&buf, i: f32);
 	};
