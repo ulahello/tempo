@@ -1,4 +1,5 @@
 use ascii;
+use bufio;
 use encoding::utf8;
 use fmt;
 use io;
@@ -73,7 +74,7 @@ fn readln(prompt: str) (str | encoding::utf8::invalid | io::EOF | io::error) = {
 
 	// print prompt
 	fmt::print(prompt)?;
-	io::close(os::stdout)?;
+	bufio::flush(os::stdout)?;
 
 	// TODO: should we be reading until a line feed or EOF, rather
 	// than just trusting that one syscall corresponds to one
